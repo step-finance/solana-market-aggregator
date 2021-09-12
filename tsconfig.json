@@ -8,6 +8,8 @@
     "moduleResolution": "node",
     "esModuleInterop": true,
     "noImplicitAny": false,
+    "skipLibCheck": true,
+    "declaration": true,
   },
   "exclude":[
     "./node_modules",
