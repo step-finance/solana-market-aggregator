@@ -7,7 +7,9 @@ describe("Market Aggregator", () => {
   describe("Can", () => {
     it("Aggregate", async () => {
 
-      const aggregator = new MarketAggregator();
+      const endpoint = "https://api.mainnet-beta.solana.com/";
+
+      const aggregator = new MarketAggregator(endpoint);
       await aggregator.queryLists();
 
       const markets = await aggregator.querySources();

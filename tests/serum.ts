@@ -74,7 +74,9 @@ describe("Serum Source", () => {
         },
       ];
 
-      const serumSource = new SerumMarketSource(testTokens, testMarkets);
+      const endpoint = "https://api.mainnet-beta.solana.com/";
+
+      const serumSource = new SerumMarketSource(testTokens, testMarkets, endpoint);
       const prices = await serumSource.query();
       expect(prices.length).to.equal(2);
     });

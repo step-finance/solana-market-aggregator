@@ -1,4 +1,8 @@
-import { Connection, PublicKey } from "@solana/web3.js";
+import {
+  Connection,
+  ConnectionConfig as Web3ConnectionConfig,
+  PublicKey
+} from "@solana/web3.js";
 import { TokenInfo } from "@solana/spl-token-registry";
 import { Market, Orderbook } from "@project-serum/serum";
 
@@ -32,8 +36,12 @@ export class SerumMarketSource implements MarketSource {
    * @param tokens List of tokens to find prices for
    * @param markets List of available markets to match tokens against
    */
-  constructor(tokens: TokenInfo[], markets: ISerumMarketInfo[]) {
-    this.connection = new Connection("https://api.mainnet-beta.solana.com/");
+  constructor(tokens: TokenInfo[], markets: ISerumMarketInfo[], rpc_endpoint: string, rpc_http_headers?: any) {
+    const web3Config: Web3ConnectionConfig = {
+      commitment: "recent",
+      httpHeaders: rpc_http_headers
+    };
+    this.connection = new Connection(rpc_endpoint, web3Config);
     this.tokens = tokens;
     this.markets = markets;
 
@@ -138,6 +146,8 @@ export class SerumMarketSource implements MarketSource {
               return cache.add(new PublicKey(address), item);
             } else if (mintsToQuery.has(address)) {
               return cache.addMint(new PublicKey(address), item);
+            } else {
+              return undefined;
             }
           })
           .filter((a) => !!a);

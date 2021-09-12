@@ -13,8 +13,12 @@ export class MarketAggregator {
   readonly STAR_ATLAS_API: string = "https://galaxy.production.run.staratlas.one/nfts";
   tokenInfos: TokenInfo[] = [];
   serumMarketInfos: ISerumMarketInfo[] = [];
+  rpc_endpoint: string;
+  rpc_http_headers: any;
 
-  constructor() {
+  constructor(rpc_endpoint: string, rpc_http_headers?: any) {
+    this.rpc_endpoint = rpc_endpoint;
+    this.rpc_http_headers = rpc_http_headers;
   }
 
   /**
@@ -47,11 +51,21 @@ export class MarketAggregator {
    * @return Array of market datas
    */
   async querySources(): Promise<IMarketData[]> {
+    // Ensure lists have always been queried at least once
+    if (this.tokenInfos.length === 0 || this.serumMarketInfos.length === 0) {
+      await this.queryLists();
+    }
+
     const cgms = new CoinGeckoMarketSource(this.tokenInfos);
     const cgPrices = await cgms.query();
 
     const tokensWithoutIDs = this.tokenInfos.filter((t) => !t.extensions?.coingeckoId);
-    const serumSource = new SerumMarketSource(tokensWithoutIDs, this.serumMarketInfos);
+    const serumSource = new SerumMarketSource(
+      tokensWithoutIDs,
+      this.serumMarketInfos,
+      this.rpc_endpoint,
+      this.rpc_http_headers
+    );
     const serumPrices = await serumSource.query();
 
     return cgPrices.concat(serumPrices);
