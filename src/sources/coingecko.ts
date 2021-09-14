@@ -9,7 +9,8 @@ import { chunks } from "../utils/web3";
  * A class that retrieves market prices from CoinGecko for a given set of tokens
  */
 export class CoinGeckoMarketSource implements MarketSource {
-  readonly API_BASE_URL: string = "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd";
+  readonly API_BASE_URL: string =
+    "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd";
   apiIDs: string[];
   tokens: TokenInfo[];
 
@@ -32,14 +33,14 @@ export class CoinGeckoMarketSource implements MarketSource {
   async query(): Promise<IMarketData[]> {
     const pages = chunks(this.apiIDs, 250);
     const responses = await Promise.all(
-      pages.map(async (p, index) =>
-        axios.get(`${this.API_BASE_URL}&ids=${p.join(",")}&page=${index + 1}&per_page=250`)
+      pages.map(async (p) =>
+        axios.get(`${this.API_BASE_URL}&ids=${p.join(",")}&per_page=250`)
       )
     );
 
-    const data: ICoinGeckoCoinMarketData[] = responses.map((r) =>
-      r.data
-    ).flat();
+    const data: ICoinGeckoCoinMarketData[] = responses
+      .map((r) => r.data)
+      .flat();
 
     return data.map((item) => {
       const symbol = item.symbol.toUpperCase();
@@ -47,8 +48,8 @@ export class CoinGeckoMarketSource implements MarketSource {
         source: "coingecko",
         symbol: symbol,
         address: this.tokens.find((t) => t.symbol === symbol)?.address ?? "",
-        price: item.current_price
-      }
+        price: item.current_price,
+      };
     });
   }
 }
