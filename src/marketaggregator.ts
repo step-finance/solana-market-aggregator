@@ -9,7 +9,7 @@ import { IMarketData } from "./types/marketdata";
  * A class that aggregates multiple market sources
  */
 export class MarketAggregator {
-  readonly SERUM_MARKET_LIST: string = "https://raw.githubusercontent.com/dr497/awesome-serum-markets/master/js/markets.json";
+  readonly SERUM_MARKET_LIST: string = "https://raw.githubusercontent.com/step-finance/serum-markets/main/src/markets.json";
   readonly STAR_ATLAS_API: string = "https://galaxy.production.run.staratlas.one/nfts";
   tokenInfos: TokenInfo[] = [];
   serumMarketInfos: ISerumMarketInfo[] = [];
