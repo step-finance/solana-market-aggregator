@@ -42,7 +42,7 @@ export class CoinGeckoMarketSource implements MarketSource {
       .map((r) => r.data)
       .flat();
 
-    const finalList = this.tokens.map((token) => {
+    return this.tokens.map((token) => {
       const coinGeckoInfo = data.find((cgItem) => token.extensions?.coingeckoId === cgItem.id);
 
       if (!coinGeckoInfo) {
@@ -56,7 +56,5 @@ export class CoinGeckoMarketSource implements MarketSource {
         price: coinGeckoInfo.current_price,
       };
     }).filter((x) => !!x) as IMarketData[];
-
-    return finalList;
   }
 }
