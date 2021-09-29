@@ -1,6 +1,5 @@
 import axios from "axios";
 import { TokenListProvider, TokenInfo, Strategy, ENV } from "@solana/spl-token-registry";
-import { } from "@project-serum/serum";
 import {
   CoinGeckoMarketSource,
   SerumMarketSource,

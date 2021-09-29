@@ -23,8 +23,10 @@ describe("Market Aggregator", () => {
 
       const markets = await aggregator.querySources();
       expect(markets.length).to.gt(0);
-      expect(markets.map(({ address }) => address)).to.include(STEP_ADDRESS);
-      expect(markets.map(({ address }) => address)).to.include(XSTEP_MINT);
+
+      const addresses = markets.map(({ address }) => address);
+      expect(addresses).to.include(STEP_ADDRESS);
+      expect(addresses).to.include(XSTEP_MINT);
     });
   });
 });
