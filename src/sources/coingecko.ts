@@ -55,6 +55,6 @@ export class CoinGeckoMarketSource implements MarketSource {
         address: token.address,
         price: coinGeckoInfo.current_price,
       };
-    }).filter((x) => !!x) as IMarketData[];
+    }).filter((x): x is IMarketData => !!x);
   }
 }
