@@ -42,14 +42,21 @@ export class CoinGeckoMarketSource implements MarketSource {
       .map((r) => r.data)
       .flat();
 
-    return data.map((item) => {
-      const symbol = item.symbol.toUpperCase();
+    const finalList = this.tokens.map((token) => {
+      const coinGeckoInfo = data.find((cgItem) => token.extensions?.coingeckoId === cgItem.id);
+
+      if (!coinGeckoInfo) {
+        return undefined;
+      }
+
       return {
         source: "coingecko",
-        symbol: symbol,
-        address: this.tokens.find((t) => t.symbol === symbol)?.address ?? "",
-        price: item.current_price,
+        symbol: token.symbol,
+        address: token.address,
+        price: coinGeckoInfo.current_price,
       };
-    });
+    }).filter((x) => !!x) as IMarketData[];
+
+    return finalList;
   }
 }
