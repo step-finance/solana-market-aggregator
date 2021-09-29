@@ -1,7 +1,12 @@
 import axios from "axios";
 import { TokenListProvider, TokenInfo, Strategy, ENV } from "@solana/spl-token-registry";
 import { } from "@project-serum/serum";
-import { CoinGeckoMarketSource, SerumMarketSource, SERUM_PROGRAM_ID_V3 } from "./sources";
+import {
+  CoinGeckoMarketSource,
+  SerumMarketSource,
+  StakedStepMarketSource,
+  SERUM_PROGRAM_ID_V3
+} from "./sources";
 import { ISerumMarketInfo } from "./types/serum";
 import { IMarketData } from "./types/marketdata";
 
@@ -15,10 +20,12 @@ export class MarketAggregator {
   serumMarketInfos: ISerumMarketInfo[] = [];
   rpc_endpoint: string;
   rpc_http_headers: any;
+  xStep: StakedStepMarketSource;
 
   constructor(rpc_endpoint: string, rpc_http_headers?: any) {
     this.rpc_endpoint = rpc_endpoint;
     this.rpc_http_headers = rpc_http_headers;
+    this.xStep = new StakedStepMarketSource(this.rpc_endpoint, this.rpc_http_headers);
   }
 
   /**
@@ -36,7 +43,6 @@ export class MarketAggregator {
 
       this.tokenInfos = tokenList.concat(starAtlasInfo.tokens);
       this.serumMarketInfos = serumMarketList.concat(starAtlasInfo.markets);
-
     } catch (err) {
       console.log(err)
       return false;
@@ -68,7 +74,9 @@ export class MarketAggregator {
     );
     const serumPrices = await serumSource.query();
 
-    return cgPrices.concat(serumPrices);
+    const xStepPrice = await this.xStep.query();
+
+    return cgPrices.concat(serumPrices).concat(xStepPrice);
   }
 
   private async queryTokenList(): Promise<TokenInfo[]> {

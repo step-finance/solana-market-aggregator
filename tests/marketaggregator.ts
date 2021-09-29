@@ -3,6 +3,7 @@ import { MarketAggregator } from "../src/marketaggregator";
 
 const endpoint = "https://api.mainnet-beta.solana.com/";
 const STEP_ADDRESS = "StepAscQoEioFxxWGnh2sLBDFp9d8rvKz2Yp39iDpyT";
+const XSTEP_MINT = "xStpgUCss9piqeFUk2iLVcvJEGhAdJxJQuwLkXP555G";
 
 describe("Market Aggregator", () => {
   describe("#queryLists", () => {
@@ -23,6 +24,7 @@ describe("Market Aggregator", () => {
       const markets = await aggregator.querySources();
       expect(markets.length).to.gt(0);
       expect(markets.map(({ address }) => address)).to.include(STEP_ADDRESS);
+      expect(markets.map(({ address }) => address)).to.include(XSTEP_MINT);
     });
   });
 });
