@@ -11,7 +11,7 @@ import { IMarketData } from "../types/marketdata";
 import XSTEP_IDL from "../models/idl/step_staking.json";
 
 const XSTEP_PROGRAM_ID = "Stk5NCWomVN3itaFjLu382u9ibb5jMSHEsh6CuhaGjB";
-const STEP_MINT = "StepAscQoEioFxxWGnh2sLBDFp9d8rvKz2Yp39iDpyT";
+export const STEP_MINT = "StepAscQoEioFxxWGnh2sLBDFp9d8rvKz2Yp39iDpyT";
 const XSTEP_MINT = "xStpgUCss9piqeFUk2iLVcvJEGhAdJxJQuwLkXP555G";
 const XSTEP_TOKEN_VAULT = "ANYxxG365hutGYaTdtUQG8u2hC4dFX9mFHKuzy9ABQJi";
 const STEP_DEPLOYER = "GkT2mRSujbydLUmA178ykHe7hZtaUpkmX2sfwS8suWb3";
@@ -66,7 +66,7 @@ export class StakedStepMarketSource implements MarketSource {
    *
    * @return Array containing one element which is xSTEP
    */
-  async query(): Promise<IMarketData[]> {
+  async query(stepPrice: number): Promise<IMarketData[]> {
     const res = await this.program.simulate.emitPrice({
       accounts: {
         tokenMint: new web3.PublicKey(STEP_MINT),
@@ -81,7 +81,7 @@ export class StakedStepMarketSource implements MarketSource {
         source: "contract",
         symbol: "xSTEP",
         address: XSTEP_MINT,
-        price: Number(priceEvent.stepPerXstep),
+        price: Number(priceEvent.stepPerXstep) * stepPrice,
       },
     ];
   }

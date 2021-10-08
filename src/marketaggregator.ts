@@ -4,7 +4,8 @@ import {
   CoinGeckoMarketSource,
   SerumMarketSource,
   StakedStepMarketSource,
-  SERUM_PROGRAM_ID_V3
+  SERUM_PROGRAM_ID_V3,
+  STEP_MINT
 } from "./sources";
 import { ISerumMarketInfo } from "./types/serum";
 import { IMarketData } from "./types/marketdata";
@@ -73,9 +74,15 @@ export class MarketAggregator {
     );
     const serumPrices = await serumSource.query();
 
-    const xStepPrice = await this.xStep.query();
+    let sources = cgPrices.concat(serumPrices);
 
-    return cgPrices.concat(serumPrices).concat(xStepPrice);
+    const stepMarketData = cgPrices.find(({ address }) => address === STEP_MINT);
+    if (stepMarketData) {
+      const xStepPrice = await this.xStep.query(stepMarketData.price);
+      sources = sources.concat(xStepPrice);
+    }
+
+    return sources;
   }
 
   private async queryTokenList(): Promise<TokenInfo[]> {
