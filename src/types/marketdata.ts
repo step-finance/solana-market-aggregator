@@ -3,4 +3,5 @@ export interface IMarketData {
   symbol: string;
   address: string;
   price: number;
+  metadata?: Record<string, any>;
 }

@@ -1,7 +1,7 @@
 import {
   Connection,
   ConnectionConfig as Web3ConnectionConfig,
-  PublicKey
+  PublicKey,
 } from "@solana/web3.js";
 import { TokenInfo } from "@solana/spl-token-registry";
 import { Market, Orderbook } from "@project-serum/serum";
@@ -12,7 +12,14 @@ import { ISerumMarketInfo, DexMarketParser } from "../types/serum";
 import { cache } from "../utils/account";
 import { getMultipleAccounts } from "../utils/web3";
 
-export const SERUM_PROGRAM_ID_V3 = "9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin";
+export const SERUM_PROGRAM_ID_V3 =
+  "9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin";
+
+export type MarketPrices = {
+  bid: number;
+  ask: number;
+  mid: number;
+};
 
 export interface ISerumMarketTokenInfo {
   marketInfo: ISerumMarketInfo;
@@ -36,10 +43,15 @@ export class SerumMarketSource implements MarketSource {
    * @param tokens List of tokens to find prices for
    * @param markets List of available markets to match tokens against
    */
-  constructor(tokens: TokenInfo[], markets: ISerumMarketInfo[], rpc_endpoint: string, rpc_http_headers?: any) {
+  constructor(
+    tokens: TokenInfo[],
+    markets: ISerumMarketInfo[],
+    rpc_endpoint: string,
+    rpc_http_headers?: any
+  ) {
     const web3Config: Web3ConnectionConfig = {
       commitment: "recent",
-      httpHeaders: rpc_http_headers
+      httpHeaders: rpc_http_headers,
     };
     this.connection = new Connection(rpc_endpoint, web3Config);
     this.tokens = tokens;
@@ -55,13 +67,10 @@ export class SerumMarketSource implements MarketSource {
         );
 
       if (marketInfo) {
-        map.set(
-          token.address,
-          {
-            marketInfo,
-            tokenInfo: token
-          }
-        );
+        map.set(token.address, {
+          marketInfo,
+          tokenInfo: token,
+        });
       }
 
       return map;
@@ -98,12 +107,16 @@ export class SerumMarketSource implements MarketSource {
 
     const marketDatas: IMarketData[] = [];
     this.marketByMint.forEach((value, key) => {
+      const { price, marketPrices } = this.getMarketPrices(key);
       marketDatas.push({
         source: "serum",
         symbol: value.tokenInfo.symbol,
         address: key,
-        price: this.getBidPrice(key),
-      })
+        price,
+        metadata: {
+          marketPrices,
+        }
+      });
     });
 
     return marketDatas;
@@ -153,30 +166,49 @@ export class SerumMarketSource implements MarketSource {
           .filter((a) => !!a);
       }
     );
-  }
+  };
 
-  private getBidPrice = (
+  private getMarketPrices = (
     mintAddress: string
-  ): number => {
+  ): {
+    price: number;
+    marketPrices: MarketPrices;
+  } => {
     let [bid, ask, mid] = [-1, -1, 0.0];
 
-    const marketTokenInfo = this.marketByMint.get(mintAddress)
+    const marketTokenInfo = this.marketByMint.get(mintAddress);
 
     if (!marketTokenInfo) {
-      return bid;
+      return {
+        price: bid,
+        marketPrices: {
+          bid,
+          ask,
+          mid,
+        },
+      };
     }
 
     const marketAddress = marketTokenInfo.marketInfo.address;
 
     const marketAccount = cache.get(marketAddress);
     if (!marketAccount) {
-      return bid;
+      return {
+        price: bid,
+        marketPrices: {
+          bid,
+          ask,
+          mid,
+        },
+      };
     }
 
     const decodedMarket = marketAccount.info;
 
-    const baseMintDecimals = cache.getMint(decodedMarket.baseMint)?.decimals || 0;
-    const quoteMintDecimals = cache.getMint(decodedMarket.quoteMint)?.decimals || 0;
+    const baseMintDecimals =
+      cache.getMint(decodedMarket.baseMint)?.decimals || 0;
+    const quoteMintDecimals =
+      cache.getMint(decodedMarket.quoteMint)?.decimals || 0;
 
     const market = new Market(
       decodedMarket,
@@ -189,6 +221,7 @@ export class SerumMarketSource implements MarketSource {
     const bids = cache.get(decodedMarket.bids)?.info;
     const asks = cache.get(decodedMarket.asks)?.info;
 
+    let price = mid;
     if (bids) {
       const bidsBook = new Orderbook(market, bids.accountFlags, bids.slab);
       const asksBook = new Orderbook(market, asks.accountFlags, asks.slab);
@@ -196,17 +229,29 @@ export class SerumMarketSource implements MarketSource {
       const bestBid = bidsBook.getL2(1);
       const bestAsk = asksBook.getL2(1);
 
-      if (bestBid.length > 0 && bestAsk.length > 0) {
+      if (bestBid.length > 0) {
         bid = bestBid[0][0];
+        price = bid;
+      }
+
+      if (bestAsk.length > 0) {
         ask = bestAsk[0][0];
+        price = ask;
+      }
+
+      if (bestBid.length > 0 && bestAsk.length > 0) {
         mid = (bid + ask) / 2.0;
-      } else if (bestBid.length > 0) {
-        return bestBid[0][0];
-      } else if (bestAsk.length > 0) {
-        return bestAsk[0][0];
+        price = mid;
       }
     }
 
-    return mid;
-  }
+    return {
+      price,
+      marketPrices: {
+        bid,
+        ask,
+        mid,
+      },
+    };
+  };
 }
