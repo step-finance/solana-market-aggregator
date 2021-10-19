@@ -94,9 +94,6 @@ export class SerumMarketSource implements MarketSource {
       "single"
     ).then(({ keys, array }) => {
       return array.map((item, index) => {
-        if (!item) {
-          return undefined;
-        }
         const marketAddress = keys[index];
         cache.add(marketAddress, item, DexMarketParser);
         return item;
@@ -151,9 +148,6 @@ export class SerumMarketSource implements MarketSource {
       ({ keys, array }) => {
         return array
           .map((item, index) => {
-            if (!item) {
-              return undefined;
-            }
             const address = keys[index];
             if (accountsToQuery.has(address)) {
               return cache.add(new PublicKey(address), item);
