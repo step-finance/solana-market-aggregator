@@ -11,6 +11,10 @@ export interface ISerumMarketInfo {
   deprecated: boolean;
 }
 
+export type SerumMarketInfoMap = {
+  [name: string]: ISerumMarketInfo;
+};
+
 export const OrderBookParser = (id: PublicKey, acc: AccountInfo<Buffer>) => {
   const decoded = Orderbook.LAYOUT.decode(acc.data);
 
@@ -33,9 +37,7 @@ export const DexMarketParser = (
   pubkey: PublicKey,
   acc: AccountInfo<Buffer>
 ) => {
-  const decoded = Market.getLayout(DEFAULT_DEX_ID).decode(
-    acc.data
-  );
+  const decoded = Market.getLayout(DEFAULT_DEX_ID).decode(acc.data);
 
   const details = {
     pubkey,

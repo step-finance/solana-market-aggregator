@@ -1,19 +1,10 @@
-import {
-  AccountInfo,
-  Connection,
-  PublicKey
-} from "@solana/web3.js";
-import {
-  AccountLayout,
-  u64,
-  MintInfo,
-  MintLayout,
-} from "@solana/spl-token";
+import { AccountInfo, Connection, PublicKey } from "@solana/web3.js";
+import { AccountLayout, u64, MintInfo, MintLayout } from "@solana/spl-token";
 import { Buffer } from "buffer";
 import {
   ParsedAccountBase,
   AccountParser,
-  TokenAccount
+  TokenAccount,
 } from "../types/account";
 
 const pendingMintCalls = new Map<string, Promise<MintInfo>>();
@@ -21,7 +12,6 @@ const mintCache = new Map<string, MintInfo>();
 const pendingCalls = new Map<string, Promise<ParsedAccountBase>>();
 const genericCache = new Map<string, ParsedAccountBase>();
 const keyToAccountParser = new Map<string, AccountParser>();
-
 
 const getMintInfo = async (connection: Connection, pubKey: PublicKey) => {
   /*if (pubKey.equals(SOL_MINT)) {
@@ -114,9 +104,7 @@ export const cache = {
 
     query = connection.getAccountInfo(id).then((data) => {
       if (!data) {
-        throw new Error(
-          "Account not found with addresss ID " + id.toBase58()
-        );
+        throw new Error(`Account not found with address ID ${id.toBase58()}`);
       }
 
       return cache.add(id, data, parser);

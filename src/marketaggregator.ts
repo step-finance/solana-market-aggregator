@@ -1,31 +1,39 @@
-import axios from "axios";
-import { TokenListProvider, TokenInfo, Strategy, ENV } from "@solana/spl-token-registry";
+import { Cluster, Connection, ConnectionConfig } from "@solana/web3.js";
 import {
   CoinGeckoMarketSource,
   SerumMarketSource,
   StakedStepMarketSource,
-  SERUM_PROGRAM_ID_V3,
-  STEP_MINT
+  STEP_MINT,
 } from "./sources";
-import { ISerumMarketInfo } from "./types/serum";
-import { IMarketData } from "./types/marketdata";
+import { SerumMarketInfoMap } from "./types/serum";
+import { MarketSourcesData } from "./types/marketdata";
+import { getTokenMap, TokenMap } from "./utils/tokens";
+import { getMintInfoMap } from "./utils/mints";
+import { getSerumMarketInfoMap } from "./utils/serum";
+import { getStarAtlasData } from "./utils/star-atlas";
+
+export type MarketAggregatorConnectionConfig = ConnectionConfig & {
+  endpoint: string;
+  cluster: Cluster;
+};
 
 /**
  * A class that aggregates multiple market sources
  */
 export class MarketAggregator {
-  readonly SERUM_MARKET_LIST: string = "https://raw.githubusercontent.com/step-finance/serum-markets/main/src/markets.json";
-  readonly STAR_ATLAS_API: string = "https://galaxy.production.run.staratlas.one/nfts";
-  tokenInfos: TokenInfo[] = [];
-  serumMarketInfos: ISerumMarketInfo[] = [];
-  rpc_endpoint: string;
-  rpc_http_headers: any;
+  readonly connection: Connection;
+  readonly cluster: Cluster;
+  tokenMap: TokenMap = {};
+  serumMarketMap: SerumMarketInfoMap = {};
   xStep: StakedStepMarketSource;
+  // Map of tokens without CoinGecko IDs
+  private serumTokenMap: TokenMap = {};
 
-  constructor(rpc_endpoint: string, rpc_http_headers?: any) {
-    this.rpc_endpoint = rpc_endpoint;
-    this.rpc_http_headers = rpc_http_headers;
-    this.xStep = new StakedStepMarketSource(this.rpc_endpoint, this.rpc_http_headers);
+  constructor(config: MarketAggregatorConnectionConfig) {
+    const { endpoint, cluster, ...web3ConnectionConfig } = config;
+    this.connection = new Connection(endpoint, web3ConnectionConfig);
+    this.cluster = cluster;
+    this.xStep = new StakedStepMarketSource(this.connection);
   }
 
   /**
@@ -35,16 +43,27 @@ export class MarketAggregator {
    */
   async queryLists(): Promise<boolean> {
     try {
-      const tokenList = await this.queryTokenList();
-      const starAtlasInfo = await this.queryStarAtlas();
+      const tokenMap = await getTokenMap(this.connection, this.cluster);
+      const { tokenMap: starAtlasTokenMap, markets: starAtlasSerumMarkets } =
+        await getStarAtlasData(this.cluster);
 
-      const smResponse = await axios.get(this.SERUM_MARKET_LIST);
-      const serumMarketList = smResponse.data as ISerumMarketInfo[];
-
-      this.tokenInfos = tokenList.concat(starAtlasInfo.tokens);
-      this.serumMarketInfos = serumMarketList.concat(starAtlasInfo.markets);
+      const serumMarketInfoMap = await getSerumMarketInfoMap();
+      this.tokenMap = { ...tokenMap, ...starAtlasTokenMap };
+      this.serumTokenMap = Object.values(this.tokenMap).reduce(
+        (map, tokenInfo) => {
+          if (!tokenInfo.extensions?.coingeckoId) {
+            map[tokenInfo.address] = tokenInfo;
+          }
+          return map;
+        },
+        {}
+      );
+      this.serumMarketMap = {
+        ...serumMarketInfoMap,
+        ...starAtlasSerumMarkets,
+      };
     } catch (err) {
-      console.log(err)
+      console.log(err);
       return false;
     }
 
@@ -56,69 +75,35 @@ export class MarketAggregator {
    *
    * @return Array of market datas
    */
-  async querySources(): Promise<IMarketData[]> {
+  async querySources(): Promise<MarketSourcesData> {
     // Ensure lists have always been queried at least once
-    if (this.tokenInfos.length === 0 || this.serumMarketInfos.length === 0) {
+    if (
+      Object.keys(this.tokenMap).length === 0 ||
+      Object.keys(this.serumMarketMap).length === 0
+    ) {
       await this.queryLists();
     }
 
-    const cgms = new CoinGeckoMarketSource(this.tokenInfos);
-    const cgPrices = await cgms.query();
-
-    const tokensWithoutIDs = this.tokenInfos.filter((t) => !t.extensions?.coingeckoId);
-    const serumSource = new SerumMarketSource(
-      tokensWithoutIDs,
-      this.serumMarketInfos,
-      this.rpc_endpoint,
-      this.rpc_http_headers
+    const coingeckoMarketDataMap = await new CoinGeckoMarketSource().query(
+      this.tokenMap
     );
-    const serumPrices = await serumSource.query();
+    const serumSource = new SerumMarketSource(
+      this.connection,
+      this.serumTokenMap,
+      this.serumMarketMap
+    );
+    const serumMarketDataMap = await serumSource.query();
 
-    let sources = cgPrices.concat(serumPrices);
+    let markets = { ...serumMarketDataMap, ...coingeckoMarketDataMap };
 
-    const stepMarketData = cgPrices.find(({ address }) => address === STEP_MINT);
+    const stepMarketData = coingeckoMarketDataMap[STEP_MINT];
     if (stepMarketData) {
-      const xStepPrice = await this.xStep.query(stepMarketData.price);
-      sources = sources.concat(xStepPrice);
+      const xStepDataMap = await this.xStep.query(stepMarketData.price);
+      markets = { ...markets, ...xStepDataMap };
     }
 
-    return sources;
-  }
+    const mintInfo = await getMintInfoMap(this.connection, this.tokenMap);
 
-  private async queryTokenList(): Promise<TokenInfo[]> {
-    const tokenListProvider = new TokenListProvider();
-    const tokenList = await tokenListProvider.resolve(Strategy.GitHub);
-    return tokenList.filterByChainId(ENV.MainnetBeta)
-      .excludeByTag("lp-token")
-      .excludeByTag("tokenized-stock")
-      .getList()
-  }
-
-  private async queryStarAtlas(): Promise<{ tokens: TokenInfo[], markets: ISerumMarketInfo[] }> {
-    const saResponse = await axios.get(this.STAR_ATLAS_API);
-    const starAtlasTokens = saResponse.data.map((nft: any) => {
-      return {
-        chainId: 101,
-        address: nft.mint,
-        name: nft.symbol,
-        decimals: 0,
-        symbol: nft.symbol
-      };
-    });
-
-    const starAtlasMarkets = saResponse.data.map((nft: any) => {
-      return {
-        deprecated: false,
-        address: nft.markets[0].id,
-        name: `${nft.symbol}/${nft.markets[0].quotePair}`,
-        programId: nft.markets[0].serumProgramId ?
-          nft.markets[0].serumProgramId : SERUM_PROGRAM_ID_V3
-      }
-    });
-
-    return {
-      tokens: starAtlasTokens,
-      markets: starAtlasMarkets
-    };
+    return { markets, mintInfo };
   }
 }

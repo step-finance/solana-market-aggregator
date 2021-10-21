@@ -1,18 +1,14 @@
-import {
-  Connection,
-  ConnectionConfig as Web3ConnectionConfig,
-  ConfirmOptions,
-} from "@solana/web3.js";
+import { Connection, ConfirmOptions } from "@solana/web3.js";
 import { BN, Idl, Program, Provider, web3 } from "@project-serum/anchor";
 import type { Wallet } from "@project-serum/anchor/src/provider";
 
 import { MarketSource } from "./marketsource";
-import { IMarketData } from "../types/marketdata";
+import { MarketDataMap } from "../types/marketdata";
 import XSTEP_IDL from "../models/idl/step_staking.json";
 
 const XSTEP_PROGRAM_ID = "Stk5NCWomVN3itaFjLu382u9ibb5jMSHEsh6CuhaGjB";
 export const STEP_MINT = "StepAscQoEioFxxWGnh2sLBDFp9d8rvKz2Yp39iDpyT";
-const XSTEP_MINT = "xStpgUCss9piqeFUk2iLVcvJEGhAdJxJQuwLkXP555G";
+export const XSTEP_MINT = "xStpgUCss9piqeFUk2iLVcvJEGhAdJxJQuwLkXP555G";
 const XSTEP_TOKEN_VAULT = "ANYxxG365hutGYaTdtUQG8u2hC4dFX9mFHKuzy9ABQJi";
 const STEP_DEPLOYER = "GkT2mRSujbydLUmA178ykHe7hZtaUpkmX2sfwS8suWb3";
 
@@ -25,22 +21,17 @@ type XStepPriceEvent = {
  * A class that retrieves market price of xSTEP
  */
 export class StakedStepMarketSource implements MarketSource {
-  connection: Connection;
-  provider: Provider;
-  program: Program;
+  readonly connection: Connection;
+  readonly provider: Provider;
+  readonly program: Program;
 
   /**
    * Create the class
    *
-   * @param rpc_endpoint RPC endpoint
-   * @param rpc_http_headers Optional HTTP headers for RPC connection
+   * @param connection Web3 Connection
    */
-  constructor(rpc_endpoint: string, rpc_http_headers?: any) {
-    const web3Config: Web3ConnectionConfig = {
-      commitment: "recent",
-      httpHeaders: rpc_http_headers,
-    };
-    this.connection = new Connection(rpc_endpoint, web3Config);
+  constructor(connection: Connection) {
+    this.connection = connection;
 
     const CONFIRM_OPTIONS: ConfirmOptions = {
       preflightCommitment: "recent",
@@ -66,7 +57,7 @@ export class StakedStepMarketSource implements MarketSource {
    *
    * @return Array containing one element which is xSTEP
    */
-  async query(stepPrice: number): Promise<IMarketData[]> {
+  async query(stepPrice: number): Promise<MarketDataMap> {
     const res = await this.program.simulate.emitPrice({
       accounts: {
         tokenMint: new web3.PublicKey(STEP_MINT),
@@ -76,13 +67,13 @@ export class StakedStepMarketSource implements MarketSource {
     });
 
     const priceEvent = res.events[0].data as XStepPriceEvent;
-    return [
-      {
+    return {
+      [XSTEP_MINT]: {
         source: "contract",
         symbol: "xSTEP",
         address: XSTEP_MINT,
         price: Number(priceEvent.stepPerXstep) * stepPrice,
       },
-    ];
+    };
   }
 }
