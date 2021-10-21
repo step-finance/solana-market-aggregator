@@ -1,16 +1,17 @@
-import {
-  Connection,
-  ConnectionConfig as Web3ConnectionConfig,
-  PublicKey,
-} from "@solana/web3.js";
+import { Connection, PublicKey } from "@solana/web3.js";
 import { TokenInfo } from "@solana/spl-token-registry";
 import { Market, Orderbook } from "@project-serum/serum";
 
 import { MarketSource } from "./marketsource";
-import { IMarketData } from "../types/marketdata";
-import { ISerumMarketInfo, DexMarketParser } from "../types/serum";
+import { MarketDataMap } from "../types/marketdata";
+import {
+  ISerumMarketInfo,
+  DexMarketParser,
+  SerumMarketInfoMap,
+} from "../types/serum";
 import { cache } from "../utils/account";
 import { getMultipleAccounts } from "../utils/web3";
+import { TokenMap } from "../utils/tokens";
 
 export const SERUM_PROGRAM_ID_V3 =
   "9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin";
@@ -31,11 +32,11 @@ export interface ISerumMarketTokenInfo {
  * and markets.
  */
 export class SerumMarketSource implements MarketSource {
-  tokens: TokenInfo[];
-  markets: ISerumMarketInfo[];
-  marketKeys: string[];
-  marketByMint: Map<string, ISerumMarketTokenInfo>;
-  connection: Connection;
+  readonly connection: Connection;
+  readonly tokenMap: TokenMap;
+  readonly marketInfoMap: SerumMarketInfoMap;
+  private marketKeys: string[];
+  private marketByMint: Map<string, ISerumMarketTokenInfo>;
 
   /**
    * Create the class
@@ -44,29 +45,19 @@ export class SerumMarketSource implements MarketSource {
    * @param markets List of available markets to match tokens against
    */
   constructor(
-    tokens: TokenInfo[],
-    markets: ISerumMarketInfo[],
-    rpc_endpoint: string,
-    rpc_http_headers?: any
+    connection: Connection,
+    tokenMap: TokenMap,
+    marketInfoMap: SerumMarketInfoMap
   ) {
-    const web3Config: Web3ConnectionConfig = {
-      commitment: "recent",
-      httpHeaders: rpc_http_headers,
-    };
-    this.connection = new Connection(rpc_endpoint, web3Config);
-    this.tokens = tokens;
-    this.markets = markets;
+    this.connection = connection;
+    this.tokenMap = tokenMap;
+    this.marketInfoMap = marketInfoMap;
 
-    this.marketByMint = this.tokens.reduce((map, token) => {
-      const marketInfo = this.markets
-        .filter((m) => !m.deprecated)
-        .find(
-          (m) =>
-            m.name === `${token.symbol}/USDC` ||
-            m.name === `${token.symbol}/USDT`
-        );
-
-      if (marketInfo) {
+    this.marketByMint = Object.values(this.tokenMap).reduce((map, token) => {
+      const marketInfo =
+        marketInfoMap[`${token.symbol}/USDC`] ??
+        marketInfoMap[`${token.symbol}/USDT`];
+      if (marketInfo && !marketInfo.deprecated) {
         map.set(token.address, {
           marketInfo,
           tokenInfo: token,
@@ -86,7 +77,7 @@ export class SerumMarketSource implements MarketSource {
    *
    * @return Array of market datas
    */
-  async query(): Promise<IMarketData[]> {
+  async query(): Promise<MarketDataMap> {
     await getMultipleAccounts(
       this.connection,
       // only query for markets that are not in cache
@@ -102,21 +93,21 @@ export class SerumMarketSource implements MarketSource {
 
     await this.updatePrices();
 
-    const marketDatas: IMarketData[] = [];
-    this.marketByMint.forEach((value, key) => {
-      const { price, marketPrices } = this.getMarketPrices(key);
-      marketDatas.push({
+    const marketDataMap: MarketDataMap = {};
+    this.marketByMint.forEach((value, address) => {
+      const { price, marketPrices } = this.getMarketPrices(address);
+      marketDataMap[address] = {
         source: "serum",
         symbol: value.tokenInfo.symbol,
-        address: key,
+        address,
         price,
         metadata: {
           marketPrices,
-        }
-      });
+        },
+      };
     });
 
-    return marketDatas;
+    return marketDataMap;
   }
 
   private updatePrices = async () => {

@@ -1,6 +1,6 @@
-import { IMarketData } from "../types/marketdata";
+import { MarketDataMap } from "../types/marketdata";
 
 export interface MarketSource {
   // eslint-disable-next-line no-unused-vars
-  query(...args: any[]): Promise<IMarketData[]>;
+  query(...args: any[]): Promise<MarketDataMap>;
 }

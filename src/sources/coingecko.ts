@@ -1,9 +1,9 @@
 import axios from "axios";
-import { TokenInfo } from "@solana/spl-token-registry";
 import { ICoinGeckoCoinMarketData } from "../types/coingecko";
 import { MarketSource } from "./marketsource";
-import { IMarketData } from "../types/marketdata";
+import { MarketDataMap } from "../types/marketdata";
 import { chunks } from "../utils/web3";
+import { TokenMap } from "../utils/tokens";
 
 /**
  * A class that retrieves market prices from CoinGecko for a given set of tokens
@@ -11,50 +11,45 @@ import { chunks } from "../utils/web3";
 export class CoinGeckoMarketSource implements MarketSource {
   readonly API_BASE_URL: string =
     "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd";
-  apiIDs: string[];
-  tokens: TokenInfo[];
-
-  /**
-   * Create the class
-   *
-   * @param tokens List of tokens to find prices for
-   */
-  constructor(tokens: TokenInfo[]) {
-    this.tokens = tokens;
-    const tokensWithIDs = this.tokens.filter((t) => t.extensions?.coingeckoId);
-    this.apiIDs = tokensWithIDs.map((t) => t.extensions?.coingeckoId) as [];
-  }
 
   /**
    * Queries the latest market data
    *
    * @return Array of market datas
    */
-  async query(): Promise<IMarketData[]> {
-    const pages = chunks(this.apiIDs, 250);
-    const responses = await Promise.all(
-      pages.map(async (p) =>
-        axios.get(`${this.API_BASE_URL}&ids=${p.join(",")}&per_page=250`)
+  async query(tokenMap: TokenMap): Promise<MarketDataMap> {
+    const coingeckoIdMap: { [address: string]: string } = {};
+    for (let { address, extensions } of Object.values(tokenMap)) {
+      if (extensions?.coingeckoId) {
+        coingeckoIdMap[extensions.coingeckoId] = address;
+      }
+    }
+    const pages = chunks(Object.keys(coingeckoIdMap), 250);
+    const chunkedResponses = await Promise.all(
+      pages.map((p) =>
+        axios.get<ICoinGeckoCoinMarketData[]>(
+          `${this.API_BASE_URL}&ids=${p.join(",")}&per_page=250`
+        )
       )
     );
 
-    const data: ICoinGeckoCoinMarketData[] = responses
-      .map((r) => r.data)
-      .flat();
-
-    return this.tokens.map((token) => {
-      const coinGeckoInfo = data.find((cgItem) => token.extensions?.coingeckoId === cgItem.id);
-
-      if (!coinGeckoInfo) {
-        return undefined;
-      }
-
-      return {
-        source: "coingecko",
-        symbol: token.symbol,
-        address: token.address,
-        price: coinGeckoInfo.current_price,
-      };
-    }).filter((x): x is IMarketData => !!x);
+    return chunkedResponses
+      .flatMap((responses) => responses.data)
+      .reduce<MarketDataMap>(
+        (map, { id: coingeckoId, current_price: price }) => {
+          const tokenAddress = coingeckoIdMap[coingeckoId];
+          const { symbol, address } = tokenMap[tokenAddress];
+          return {
+            ...map,
+            [address]: {
+              source: "coingecko",
+              symbol,
+              address,
+              price,
+            },
+          };
+        },
+        {}
+      );
   }
 }

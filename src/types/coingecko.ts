@@ -27,6 +27,6 @@ export interface ICoinGeckoCoinMarketData {
     times: number;
     currency: string;
     percentage: number;
-  };
+  } | null;
   last_updated: string;
 }
