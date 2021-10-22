@@ -18,13 +18,13 @@ export class CoinGeckoMarketSource implements MarketSource {
    * @return Array of market datas
    */
   async query(tokenMap: TokenMap): Promise<MarketDataMap> {
-    const coingeckoIdMap: { [address: string]: string } = {};
+    const addressCoingeckoIdMap: { [address: string]: string } = {};
     for (let { address, extensions } of Object.values(tokenMap)) {
       if (extensions?.coingeckoId) {
-        coingeckoIdMap[extensions.coingeckoId] = address;
+        addressCoingeckoIdMap[address] = extensions.coingeckoId;
       }
     }
-    const pages = chunks(Object.keys(coingeckoIdMap), 250);
+    const pages = chunks(Object.values(addressCoingeckoIdMap), 250);
     const chunkedResponses = await Promise.all(
       pages.map((p) =>
         axios.get<ICoinGeckoCoinMarketData[]>(
@@ -32,24 +32,31 @@ export class CoinGeckoMarketSource implements MarketSource {
         )
       )
     );
-
-    return chunkedResponses
+    const coingeckoPriceMap = chunkedResponses
       .flatMap((responses) => responses.data)
-      .reduce<MarketDataMap>(
-        (map, { id: coingeckoId, current_price: price }) => {
-          const tokenAddress = coingeckoIdMap[coingeckoId];
-          const { symbol, address } = tokenMap[tokenAddress];
-          return {
-            ...map,
-            [address]: {
-              source: "coingecko",
-              symbol,
-              address,
-              price,
-            },
-          };
-        },
+      .reduce(
+        (map, { id, current_price }) => ({
+          ...map,
+          [id]: current_price,
+        }),
         {}
       );
+
+    return Object.keys(addressCoingeckoIdMap).reduce<MarketDataMap>(
+      (map, address) => {
+        const price = coingeckoPriceMap[address];
+        const { symbol } = tokenMap[address];
+        return {
+          ...map,
+          [address]: {
+            source: "coingecko",
+            symbol,
+            address,
+            price,
+          },
+        };
+      },
+      {}
+    );
   }
 }

@@ -6,7 +6,7 @@ import {
   STEP_MINT,
 } from "./sources";
 import { SerumMarketInfoMap } from "./types/serum";
-import { MarketSourcesData } from "./types/marketdata";
+import { MarketDataMap, MarketSourcesData } from "./types/marketdata";
 import { getTokenMap, TokenMap } from "./utils/tokens";
 import { getMintInfoMap } from "./utils/mints";
 import { getSerumMarketInfoMap } from "./utils/serum";
@@ -94,7 +94,10 @@ export class MarketAggregator {
     );
     const serumMarketDataMap = await serumSource.query();
 
-    let markets = { ...serumMarketDataMap, ...coingeckoMarketDataMap };
+    let markets: MarketDataMap = {
+      ...serumMarketDataMap,
+      ...coingeckoMarketDataMap,
+    };
 
     const stepMarketData = coingeckoMarketDataMap[STEP_MINT];
     if (stepMarketData) {
