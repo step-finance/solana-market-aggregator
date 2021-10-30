@@ -1,22 +1,13 @@
 import axios from "axios";
-import { ICoinGeckoCoinMarketData } from "../types/coingecko";
+import {
+  TokenMap,
+  MarketDataMap,
+  ICoinGeckoCoinMarketData,
+  CoingeckoTokenMap,
+  tokenInfoHasCoingeckoId,
+} from "../types";
 import { MarketSource } from "./marketsource";
-import { MarketDataMap } from "../types/marketdata";
 import { chunks } from "../utils/web3";
-import { TokenMap } from "../utils/tokens";
-import { TokenExtensions, TokenInfo } from "@solana/spl-token-registry";
-
-type TokenInfoWithCoingeckoId = Omit<TokenInfo, "extensions"> & {
-  extensions: Omit<TokenExtensions, "coingeckoId"> & {
-    readonly coingeckoId: string;
-  };
-};
-
-type CoingeckoTokenMap = { [address: string]: TokenInfoWithCoingeckoId };
-
-const tokenInfoHasCoingeckoId = (
-  tokenInfo: TokenInfo
-): tokenInfo is TokenInfoWithCoingeckoId => !!tokenInfo.extensions?.coingeckoId;
 
 /**
  * A class that retrieves market prices from CoinGecko for a given set of tokens

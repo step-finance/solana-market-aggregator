@@ -1,8 +1,7 @@
 import { Connection } from "@solana/web3.js";
 import { deserializeMint } from "@saberhq/token-utils";
-import { TokenMap } from "./tokens";
+import { TokenMap, MintInfoMap } from "../types";
 import { getMultipleAccounts } from "./web3";
-import { MintInfoMap } from "..";
 
 export type RawMintInfo = {
   mintAuthority: string | null;

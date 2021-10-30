@@ -5,13 +5,13 @@ import { Market, Orderbook } from "@project-serum/serum";
 import { MarketSource } from "./marketsource";
 import { MarketDataMap } from "../types/marketdata";
 import {
-  ISerumMarketInfo,
   DexMarketParser,
+  ISerumMarketInfo,
   SerumMarketInfoMap,
-} from "../types/serum";
+  TokenMap,
+} from "../types";
 import { cache } from "../utils/account";
 import { getMultipleAccounts } from "../utils/web3";
-import { TokenMap } from "../utils/tokens";
 
 export const SERUM_PROGRAM_ID_V3 =
   "9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin";

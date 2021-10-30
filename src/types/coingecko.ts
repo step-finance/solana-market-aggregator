@@ -1,3 +1,5 @@
+import { TokenExtensions, TokenInfo } from "@solana/spl-token-registry";
+
 export interface ICoinGeckoCoinMarketData {
   id: string;
   symbol: string;
@@ -30,3 +32,14 @@ export interface ICoinGeckoCoinMarketData {
   } | null;
   last_updated: string;
 }
+
+export type TokenInfoWithCoingeckoId = Omit<TokenInfo, "extensions"> & {
+  extensions: Omit<TokenExtensions, "coingeckoId"> & {
+    readonly coingeckoId: string;
+  };
+};
+export const tokenInfoHasCoingeckoId = (
+  tokenInfo: TokenInfo
+): tokenInfo is TokenInfoWithCoingeckoId => !!tokenInfo.extensions?.coingeckoId;
+
+export type CoingeckoTokenMap = { [address: string]: TokenInfoWithCoingeckoId };
