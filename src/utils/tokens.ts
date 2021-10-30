@@ -8,6 +8,7 @@ import {
 } from "@solana/spl-token-registry";
 import { deserializeMint } from "@saberhq/token-utils";
 import {
+  STEP_SWAP_OWNER,
   STEP_SWAP_PROGRAM_ID,
   TokenSwap as StepTokenSwap,
   TokenSwapLayout as StepSwapLayout,
@@ -15,10 +16,6 @@ import {
 import axios from "axios";
 import { getMultipleAccounts } from "./web3";
 
-// TODO: Update @stepfinance/step-swap to export this
-export const STEP_SWAP_OWNER = new PublicKey(
-  "GkT2mRSujbydLUmA178ykHe7hZtaUpkmX2sfwS8suWb3"
-);
 
 // shorten the checksummed version of the input address to have 4 characters at start and end
 export function shortenAddress(address: string, chars = 4): string {
@@ -99,7 +96,6 @@ const getDevnetStepAMMTokenInfos = async (
     );
     const mintSet = new Set<string>();
     array.forEach((accountInfo) => {
-      // TODO: Update @stepfinance/step-swap with types for layout
       const poolRawData = StepSwapLayout.decode(accountInfo.data);
       const mintAString = new PublicKey(poolRawData.mintA).toBase58();
       const mintBString = new PublicKey(poolRawData.mintB).toBase58();

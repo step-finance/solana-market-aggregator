@@ -55,7 +55,7 @@
     "@solana/spl-token": "^0.1.8",
     "@solana/spl-token-registry": "^0.2.246",
     "@solana/web3.js": "^1.26.0",
-    "@stepfinance/step-swap": "^0.1.10",
+    "@stepfinance/step-swap": "^1.1.0",
     "axios": "^0.21.4",
     "bn.js": "^5.2.0",
     "buffer-layout": "^1.2.2"
