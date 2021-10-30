@@ -1,10 +1,9 @@
 import "mocha";
 import { expect } from "chai";
+import { Connection } from "@solana/web3.js";
 
 import { SerumMarketSource } from "../src/sources/serum";
-import { SerumMarketInfoMap } from "../src/types/serum";
-import { Connection } from "@solana/web3.js";
-import { TokenMap } from "../src/utils/tokens";
+import { SerumMarketInfoMap, TokenMap } from "../src/types";
 
 const testMarketInfoMap: SerumMarketInfoMap = {
   "SOL/USDC": {
