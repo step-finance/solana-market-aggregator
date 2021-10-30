@@ -270,10 +270,10 @@
     superstruct "^0.14.2"
     tweetnacl "^1.0.0"
 
-"@stepfinance/step-swap@^0.1.10":
-  version "0.1.10"
-  resolved "https://registry.yarnpkg.com/@stepfinance/step-swap/-/step-swap-0.1.10.tgz#ef49a6db994d3a0d6af4af0443e32b66305dedb8"
-  integrity sha512-/vRI0SRIy/Heb/by0aO4G4fWHGasagB4KsnT5bmUhsXELQVHRkFWKLRqcumaG1ok1Zhv8MKagIhc4aTWM1BEoQ==
+"@stepfinance/step-swap@^1.1.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@stepfinance/step-swap/-/step-swap-1.1.0.tgz#2d0f0583bfd93cf1f223e07167009d8caec7ccb1"
+  integrity sha512-yYQ6Tlb5W0F0T/5za3Fk02/tBzkDFhvQa+Tj71/5vifWK+fOatuzDvZZAU3uEI8OxYvc0gFaK9aBPlE5Ab7HiA==
   dependencies:
     "@solana/web3.js" "^1.22.0"
     bn.js "^5.1.3"
