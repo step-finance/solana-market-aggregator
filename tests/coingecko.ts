@@ -2,7 +2,7 @@ import { expect } from "chai";
 import "mocha";
 
 import { CoinGeckoMarketSource } from "../src/sources/coingecko";
-import { TokenMap } from "../src/utils/tokens";
+import { TokenMap } from "../src/types";
 
 const WRAPPED_SOL_ADDRESS = "So11111111111111111111111111111111111111112";
 
