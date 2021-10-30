@@ -25,4 +25,4 @@ export type MintInfoMap = {
 export type MarketSourcesData = {
   markets: MarketDataMap;
   mintInfo: MintInfoMap;
-}
+};

@@ -5,9 +5,13 @@ import {
   StakedStepMarketSource,
   STEP_MINT,
 } from "./sources";
-import { SerumMarketInfoMap } from "./types/serum";
-import { MarketDataMap, MarketSourcesData } from "./types/marketdata";
-import { getTokenMap, TokenMap } from "./utils/tokens";
+import {
+  MarketDataMap,
+  MarketSourcesData,
+  SerumMarketInfoMap,
+  TokenMap,
+} from "./types";
+import { getTokenMap } from "./utils/tokens";
 import { getMintInfoMap } from "./utils/mints";
 import { getSerumMarketInfoMap } from "./utils/serum";
 import { getStarAtlasData } from "./utils/star-atlas";

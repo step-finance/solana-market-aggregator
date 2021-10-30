@@ -1,10 +1,8 @@
-import { TokenMap } from "./tokens";
-import { SerumMarketInfoMap } from "../types/serum";
-import { SERUM_PROGRAM_ID_V3 } from "../sources/serum";
-import axios from "axios";
-import { StarAtlasNFT } from "../types/star-atlas";
 import { Cluster } from "@solana/web3.js";
 import { TokenListContainer } from "@solana/spl-token-registry";
+import axios from "axios";
+import { SerumMarketInfoMap, StarAtlasNFT, TokenMap } from "../types";
+import { SERUM_PROGRAM_ID_V3 } from "../sources/serum";
 
 export type StarAtlasData = {
   tokenMap: TokenMap;

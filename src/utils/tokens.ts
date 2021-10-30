@@ -15,16 +15,12 @@ import {
 } from "@stepfinance/step-swap";
 import axios from "axios";
 import { getMultipleAccounts } from "./web3";
-
+import { TokenMap } from "../types";
 
 // shorten the checksummed version of the input address to have 4 characters at start and end
 export function shortenAddress(address: string, chars = 4): string {
   return `${address.slice(0, chars)}...${address.slice(-chars)}`;
 }
-
-export type TokenMap = {
-  [address: string]: TokenInfo;
-};
 
 export const getTokenMap = async (
   connection: Connection,
