@@ -23,6 +23,7 @@ export const getStarAtlasData = async (cluster: Cluster) => {
       name: symbol,
       decimals: 0,
       symbol: symbol,
+      tags: ["nft"],
     }))
   );
   const starAtlasTokenInfos = starAtlasTokenListContainer
