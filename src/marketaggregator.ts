@@ -52,7 +52,7 @@ export class MarketAggregator {
         await getStarAtlasData(this.cluster);
 
       const serumMarketInfoMap = await getSerumMarketInfoMap();
-      this.tokenMap = { ...tokenMap, ...starAtlasTokenMap };
+      this.tokenMap = { ...starAtlasTokenMap, ...tokenMap };
       this.serumTokenMap = Object.values(this.tokenMap).reduce(
         (map, tokenInfo) => {
           if (!tokenInfo.extensions?.coingeckoId) {
@@ -63,8 +63,8 @@ export class MarketAggregator {
         {}
       );
       this.serumMarketMap = {
-        ...serumMarketInfoMap,
         ...starAtlasSerumMarkets,
+        ...serumMarketInfoMap,
       };
     } catch (err) {
       console.log(err);
