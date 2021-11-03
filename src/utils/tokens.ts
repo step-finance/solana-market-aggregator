@@ -35,7 +35,14 @@ export const getTokenMap = async (
     .getList();
 
   const tokenMap: TokenMap = baseTokenInfos.reduce<TokenMap>(
-    (map, tokenInfo) => ({ ...map, [tokenInfo.address]: tokenInfo }),
+    (map, tokenInfo) => {
+      try {
+        new PublicKey(tokenInfo.address);
+        return { ...map, [tokenInfo.address]: tokenInfo };
+      } catch (e) {
+        return map;
+      }
+    },
     {}
   );
 
