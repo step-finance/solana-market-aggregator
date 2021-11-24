@@ -39,7 +39,11 @@ export const getStarAtlasData = async (cluster: Cluster) => {
 
   const markets = starAtlasApiResponse.data.reduce<SerumMarketInfoMap>(
     (map, { markets, symbol }) => {
-      const { id: address, quotePair, serumProgramId } = markets[0];
+      const market = markets.find((m) => m.quotePair === "USDC");
+      if (!market) {
+        return map;
+      }
+      const { id: address, quotePair, serumProgramId } = market;
       const name = `${symbol}/${quotePair}`;
       return {
         ...map,
