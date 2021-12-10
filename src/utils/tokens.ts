@@ -58,7 +58,12 @@ export const getTokenMap = async (
 
   for (const tokenInfo of stepTokenOverridesTokenInfos) {
     const { address } = tokenInfo;
-    tokenMap[address] = tokenInfo;
+    try {
+      new PublicKey(address);
+      tokenMap[address] = tokenInfo;
+    } catch (e) {
+      console.error(e);
+    }
   }
 
   if (cluster === "devnet") {
