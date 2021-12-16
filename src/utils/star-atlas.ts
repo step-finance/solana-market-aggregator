@@ -1,12 +1,12 @@
 import { Cluster } from "@solana/web3.js";
 import { TokenListContainer } from "@solana/spl-token-registry";
 import axios from "axios";
-import { SerumMarketInfoMap, StarAtlasNFT, TokenMap } from "../types";
+import { ISerumMarketInfo, StarAtlasNFT, TokenMap } from "../types";
 import { SERUM_PROGRAM_ID_V3 } from "../sources/serum";
 
 export type StarAtlasData = {
   tokenMap: TokenMap;
-  markets: SerumMarketInfoMap;
+  markets: ISerumMarketInfo[];
 };
 
 export const STAR_ATLAS_API_URL =
@@ -37,25 +37,26 @@ export const getStarAtlasData = async (cluster: Cluster) => {
     {}
   );
 
-  const markets = starAtlasApiResponse.data.reduce<SerumMarketInfoMap>(
-    (map, { markets, symbol }) => {
+  const markets = starAtlasApiResponse.data.reduce<ISerumMarketInfo[]>(
+    (serumMarkets, { markets, symbol, mint }) => {
       const market = markets.find((m) => m.quotePair === "USDC");
       if (!market) {
-        return map;
+        return serumMarkets;
       }
       const { id: address, quotePair, serumProgramId } = market;
       const name = `${symbol}/${quotePair}`;
-      return {
-        ...map,
-        [name]: {
-          deprecated: false,
+      return [
+        ...serumMarkets,
+        {
           address,
+          baseMintAddress: mint,
+          deprecated: false,
           name,
           programId: serumProgramId ? serumProgramId : SERUM_PROGRAM_ID_V3,
         },
-      };
+      ];
     },
-    {}
+    []
   );
 
   return {

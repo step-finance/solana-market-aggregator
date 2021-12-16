@@ -1,13 +1,13 @@
 import { expect } from "chai";
 import { MarketAggregator } from "../src/marketaggregator";
 
+// TODO: Allow environment variable config of endpoints to avoid rate limits
 const MAINNET_BETA_ENDPOINT = "https://api.mainnet-beta.solana.com/";
 const DEVNET_ENDPOINT = "https://api.devnet.solana.com/";
 
 const STEP_ADDRESS = "StepAscQoEioFxxWGnh2sLBDFp9d8rvKz2Yp39iDpyT";
 const XSTEP_MINT = "xStpgUCss9piqeFUk2iLVcvJEGhAdJxJQuwLkXP555G";
-const EXAMPLE_DEVNET_TOKEN =
-  "7XWr8fagdZS4mrXUFexQrCd2nYxahR6AtuQkcF2AYecq";
+const EXAMPLE_DEVNET_TOKEN = "7XWr8fagdZS4mrXUFexQrCd2nYxahR6AtuQkcF2AYecq";
 
 describe("Market Aggregator", () => {
   describe("#queryLists", () => {
@@ -57,6 +57,6 @@ describe("Market Aggregator", () => {
         expect(mintInfo).not.to.be.empty;
         expect(mintInfo).to.include.keys([EXAMPLE_DEVNET_TOKEN]);
       });
-    })
+    });
   });
 });

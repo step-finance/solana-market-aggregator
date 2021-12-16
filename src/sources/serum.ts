@@ -4,12 +4,7 @@ import { Market, Orderbook } from "@project-serum/serum";
 
 import { MarketSource } from "./marketsource";
 import { MarketDataMap } from "../types/marketdata";
-import {
-  DexMarketParser,
-  ISerumMarketInfo,
-  SerumMarketInfoMap,
-  TokenMap,
-} from "../types";
+import { DexMarketParser, ISerumMarketInfo, TokenMap } from "../types";
 import { cache } from "../utils/account";
 import { getMultipleAccounts } from "../utils/web3";
 
@@ -34,9 +29,8 @@ export interface ISerumMarketTokenInfo {
 export class SerumMarketSource implements MarketSource {
   readonly connection: Connection;
   readonly tokenMap: TokenMap;
-  readonly marketInfoMap: SerumMarketInfoMap;
+  readonly markets: ISerumMarketInfo[];
   private marketKeys: string[];
-  private marketByMint: Map<string, ISerumMarketTokenInfo>;
 
   /**
    * Create the class
@@ -47,29 +41,21 @@ export class SerumMarketSource implements MarketSource {
   constructor(
     connection: Connection,
     tokenMap: TokenMap,
-    marketInfoMap: SerumMarketInfoMap
+    markets: ISerumMarketInfo[]
   ) {
     this.connection = connection;
     this.tokenMap = tokenMap;
-    this.marketInfoMap = marketInfoMap;
+    this.markets = markets;
 
-    this.marketByMint = Object.values(this.tokenMap).reduce((map, token) => {
-      const marketInfo =
-        marketInfoMap[`${token.symbol}/USDC`] ??
-        marketInfoMap[`${token.symbol}/USDT`];
-      if (marketInfo && !marketInfo.deprecated) {
-        map.set(token.address, {
-          marketInfo,
-          tokenInfo: token,
-        });
-      }
-
-      return map;
-    }, new Map<string, ISerumMarketTokenInfo>());
-
-    this.marketKeys = [...this.marketByMint.values()].map((m) => {
-      return m.marketInfo.address;
-    });
+    this.marketKeys = this.markets.reduce<string[]>(
+      (keys, { address, baseMintAddress, deprecated }) => {
+        if (!deprecated && this.tokenMap[baseMintAddress]) {
+          keys.push(address);
+        }
+        return keys;
+      },
+      []
+    );
   }
 
   /**
@@ -78,33 +64,35 @@ export class SerumMarketSource implements MarketSource {
    * @return Array of market datas
    */
   async query(): Promise<MarketDataMap> {
-    await getMultipleAccounts(
+    const { keys, array } = await getMultipleAccounts(
       this.connection,
       // only query for markets that are not in cache
       this.marketKeys.filter((a) => cache.get(a) === undefined),
       "single"
-    ).then(({ keys, array }) => {
-      return array.map((item, index) => {
-        const marketAddress = keys[index];
-        cache.add(marketAddress, item, DexMarketParser);
-        return item;
-      });
+    );
+    array.forEach((item, index) => {
+      const marketAddress = keys[index];
+      cache.add(marketAddress, item, DexMarketParser);
     });
 
     await this.updatePrices();
 
     const marketDataMap: MarketDataMap = {};
-    this.marketByMint.forEach((value, address) => {
-      const { price, marketPrices } = this.getMarketPrices(address);
-      marketDataMap[address] = {
-        source: "serum",
-        symbol: value.tokenInfo.symbol,
-        address,
-        price,
-        metadata: {
-          marketPrices,
-        },
-      };
+    this.markets.forEach(({ address: marketAddress, baseMintAddress }) => {
+      const { price, marketPrices } = this.getMarketPrices(marketAddress);
+      const tokenInfo = this.tokenMap[baseMintAddress];
+      if (tokenInfo) {
+        const { address, symbol } = this.tokenMap[baseMintAddress];
+        marketDataMap[address] = {
+          source: "serum",
+          symbol,
+          address,
+          price,
+          metadata: {
+            marketPrices,
+          },
+        };
+      }
     });
 
     return marketDataMap;
@@ -154,27 +142,12 @@ export class SerumMarketSource implements MarketSource {
   };
 
   private getMarketPrices = (
-    mintAddress: string
+    marketAddress: string
   ): {
     price: number;
     marketPrices: MarketPrices;
   } => {
     let [bid, ask, mid] = [-1, -1, 0.0];
-
-    const marketTokenInfo = this.marketByMint.get(mintAddress);
-
-    if (!marketTokenInfo) {
-      return {
-        price: bid,
-        marketPrices: {
-          bid,
-          ask,
-          mid,
-        },
-      };
-    }
-
-    const marketAddress = marketTokenInfo.marketInfo.address;
 
     const marketAccount = cache.get(marketAddress);
     if (!marketAccount) {

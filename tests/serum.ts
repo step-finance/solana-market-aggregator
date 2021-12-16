@@ -3,22 +3,24 @@ import { expect } from "chai";
 import { Connection } from "@solana/web3.js";
 
 import { SerumMarketSource } from "../src/sources/serum";
-import { SerumMarketInfoMap, TokenMap } from "../src/types";
+import { ISerumMarketInfo, TokenMap } from "../src/types";
 
-const testMarketInfoMap: SerumMarketInfoMap = {
-  "SOL/USDC": {
+const testSerumMarkets: ISerumMarketInfo[] = [
+  {
     address: "9wFFyRfZBsuAha4YcuxcXLKwMxJR43S7fPfQLusDBzvT",
+    baseMintAddress: "So11111111111111111111111111111111111111112",
     deprecated: false,
     name: "SOL/USDC",
-    programId: "EUqojwWA2rd19FZrzeBncJsm38Jm1hEhE3zsmX3bRc2o",
+    programId: "9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin",
   },
-  "BTC/USDC": {
+  {
     address: "A8YFbxQYFVqKZaoYJLLUVcQiWP7G2MeEgW5wsAQgMvFw",
+    baseMintAddress: "9n4nbM75f5Ui33ZbPYXn59EwSgE8CGsHtAeTH5YFeJ9E",
     deprecated: false,
     name: "BTC/USDC",
     programId: "9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin",
   },
-};
+];
 
 const testTokenMap: TokenMap = {
   So11111111111111111111111111111111111111112: {
@@ -78,7 +80,7 @@ describe("Serum Source", () => {
     const serumMarketSource = new SerumMarketSource(
       connection,
       testTokenMap,
-      testMarketInfoMap
+      testSerumMarkets
     );
     const marketDataMap = await serumMarketSource.query();
     expect(marketDataMap).to.include.keys([
@@ -91,7 +93,7 @@ describe("Serum Source", () => {
     const serumMarketSource = new SerumMarketSource(
       connection,
       testTokenMap,
-      testMarketInfoMap
+      testSerumMarkets
     );
     const serumSources = await serumMarketSource.query();
     const serumSource =
