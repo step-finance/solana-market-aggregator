@@ -6,14 +6,11 @@ import { cache, MintParser } from "../utils/account";
 
 export interface ISerumMarketInfo {
   address: string;
+  baseMintAddress: string;
+  deprecated: boolean;
   name: string;
   programId: string;
-  deprecated: boolean;
 }
-
-export type SerumMarketInfoMap = {
-  [name: string]: ISerumMarketInfo;
-};
 
 export const OrderBookParser = (id: PublicKey, acc: AccountInfo<Buffer>) => {
   const decoded = Orderbook.LAYOUT.decode(acc.data);

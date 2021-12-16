@@ -6,9 +6,9 @@ import {
   STEP_MINT,
 } from "./sources";
 import {
+  ISerumMarketInfo,
   MarketDataMap,
   MarketSourcesData,
-  SerumMarketInfoMap,
   TokenMap,
 } from "./types";
 import { getTokenMap } from "./utils/tokens";
@@ -28,7 +28,7 @@ export class MarketAggregator {
   readonly connection: Connection;
   readonly cluster: Cluster;
   tokenMap: TokenMap = {};
-  serumMarketMap: SerumMarketInfoMap = {};
+  serumMarkets: ISerumMarketInfo[] = [];
   xStep: StakedStepMarketSource;
   // Map of tokens without CoinGecko IDs
   private serumTokenMap: TokenMap = {};
@@ -62,10 +62,7 @@ export class MarketAggregator {
         },
         {}
       );
-      this.serumMarketMap = {
-        ...starAtlasSerumMarkets,
-        ...serumMarketInfoMap,
-      };
+      this.serumMarkets = [...starAtlasSerumMarkets, ...serumMarketInfoMap];
     } catch (err) {
       console.log(err);
       return false;
@@ -83,7 +80,7 @@ export class MarketAggregator {
     // Ensure lists have always been queried at least once
     if (
       Object.keys(this.tokenMap).length === 0 ||
-      Object.keys(this.serumMarketMap).length === 0
+      this.serumMarkets.length === 0
     ) {
       await this.queryLists();
     }
@@ -94,7 +91,7 @@ export class MarketAggregator {
     const serumSource = new SerumMarketSource(
       this.connection,
       this.serumTokenMap,
-      this.serumMarketMap
+      this.serumMarkets
     );
     const serumMarketDataMap = await serumSource.query();
 
