@@ -11,6 +11,11 @@ import { getMultipleAccounts } from "../utils/web3";
 export const SERUM_PROGRAM_ID_V3 =
   "9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin";
 
+export const USD_MINTS = new Set([
+  "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", // USDC
+  "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB", // USDT
+]);
+
 export type MarketPrices = {
   bid: number;
   ask: number;
@@ -79,9 +84,11 @@ export class SerumMarketSource implements MarketSource {
 
     const marketDataMap: MarketDataMap = {};
     this.markets.forEach(({ address: marketAddress, baseMintAddress }) => {
-      const { price, marketPrices } = this.getMarketPrices(marketAddress);
+      const { price, marketPrices, quoteMintAddress } =
+        this.getMarketPrices(marketAddress);
       const tokenInfo = this.tokenMap[baseMintAddress];
-      if (tokenInfo) {
+      const isUSDQuote = USD_MINTS.has(quoteMintAddress);
+      if (tokenInfo && isUSDQuote) {
         const { address, symbol } = this.tokenMap[baseMintAddress];
         marketDataMap[address] = {
           source: "serum",
@@ -146,12 +153,14 @@ export class SerumMarketSource implements MarketSource {
   ): {
     price: number;
     marketPrices: MarketPrices;
+    quoteMintAddress: string;
   } => {
     let [bid, ask, mid] = [-1, -1, 0.0];
 
     const marketAccount = cache.get(marketAddress);
     if (!marketAccount) {
       return {
+        quoteMintAddress: "",
         price: bid,
         marketPrices: {
           bid,
@@ -204,6 +213,7 @@ export class SerumMarketSource implements MarketSource {
     }
 
     return {
+      quoteMintAddress: market.quoteMintAddress.toBase58(),
       price,
       marketPrices: {
         bid,
