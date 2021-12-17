@@ -24,7 +24,8 @@
     "test": "mocha",
     "lint": "eslint src/ --ext .js,.jsx,.ts,.tsx",
     "build": "tsc -p tsconfig.json",
-    "clean": "rm -rf dist build"
+    "clean": "rm -rf dist build",
+    "prepublishOnly": "npm run clean && npm run build"
   },
   "keywords": [
     "step",
