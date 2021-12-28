@@ -9,6 +9,10 @@ const STEP_ADDRESS = "StepAscQoEioFxxWGnh2sLBDFp9d8rvKz2Yp39iDpyT";
 const XSTEP_MINT = "xStpgUCss9piqeFUk2iLVcvJEGhAdJxJQuwLkXP555G";
 const EXAMPLE_DEVNET_TOKEN = "7XWr8fagdZS4mrXUFexQrCd2nYxahR6AtuQkcF2AYecq";
 
+// Saber
+const AEMIM_ADDRESS = "2ASbApnFVSTp2RJvMLgLVfbDwJvu1FRXdhJWrGs89Lhj";
+const SUSD8_ADDRESS = "88881Hu2jGMfCs9tMu5Rr7Ah7WBNBuXqde4nR5ZmKYYy";
+
 describe("Market Aggregator", () => {
   describe("#queryLists", () => {
     it("queries common currencies from token-list", async () => {
@@ -19,6 +23,9 @@ describe("Market Aggregator", () => {
 
       await aggregator.queryLists();
       expect(aggregator.tokenMap).to.haveOwnProperty(STEP_ADDRESS);
+      // Spot check Saber tokens
+      expect(aggregator.tokenMap).to.haveOwnProperty(AEMIM_ADDRESS);
+      expect(aggregator.tokenMap).to.haveOwnProperty(SUSD8_ADDRESS);
     });
 
     it("queries mints from Step swap pool registry on devnet", async () => {

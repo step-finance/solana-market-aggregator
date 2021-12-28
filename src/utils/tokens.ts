@@ -66,6 +66,28 @@ export const getTokenMap = async (
     }
   }
 
+  const rawSaberTokenList = (
+    await axios.get<{ tokens: TokenInfo[] }>(
+      "https://registry.saber.so/data/token-list.mainnet.json"
+    )
+  ).data.tokens;
+  const saberTokenList = new TokenListContainer(rawSaberTokenList);
+  const saberTokenInfos = saberTokenList
+    .filterByClusterSlug(cluster)
+    .excludeByTag("saber-stableswap-lp")
+    .excludeByTag("saber-hidden")
+    .getList();
+
+  for (const tokenInfo of saberTokenInfos) {
+    const { address } = tokenInfo;
+    try {
+      new PublicKey(address);
+      tokenMap[address] = tokenInfo;
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
   if (cluster === "devnet") {
     const devnetStepAMMTokenInfos = await getDevnetStepAMMTokenInfos(
       connection,
