@@ -67,10 +67,10 @@ export const getTokenMap = async (
   }
 
   const rawSaberTokenList = (
-    await axios.get<any>(
+    await axios.get<{ tokens: TokenInfo[] }>(
       "https://registry.saber.so/data/token-list.mainnet.json"
     )
-  ).data.tokens as TokenInfo[];
+  ).data.tokens;
   const saberTokenList = new TokenListContainer(rawSaberTokenList);
   const saberTokenInfos = saberTokenList
     .filterByClusterSlug(cluster)
@@ -100,8 +100,6 @@ export const getTokenMap = async (
       }
     }
   }
-
-  console.log("tokenMap", tokenMap);
 
   return tokenMap;
 };
