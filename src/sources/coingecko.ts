@@ -5,6 +5,7 @@ import {
   ICoinGeckoCoinMarketData,
   CoingeckoTokenMap,
   tokenInfoHasCoingeckoId,
+  TokenInfoWithCoingeckoId,
 } from "../types";
 import { MarketSource } from "./marketsource";
 import { chunks } from "../utils/web3";
@@ -24,10 +25,23 @@ export class CoinGeckoMarketSource implements MarketSource {
   async query(tokenMap: TokenMap): Promise<MarketDataMap> {
     const coingeckoTokenMap: CoingeckoTokenMap = {};
     const coingeckoIds: Set<string> = new Set();
-    for (let tokenInfo of Object.values(tokenMap)) {
-      if (tokenInfoHasCoingeckoId(tokenInfo)) {
+    for (let baseTokenInfo of Object.values(tokenMap)) {
+      if (tokenInfoHasCoingeckoId(baseTokenInfo)) {
+        let tokenInfo: TokenInfoWithCoingeckoId = baseTokenInfo;
+        let coingeckoId: string = tokenInfo.extensions.coingeckoId;
+        // Hack to work around TerraUSD CoinGecko ID mismapping
+        if (coingeckoId === "terra-usd") {
+          coingeckoId = "terrausd";
+          tokenInfo = {
+            ...tokenInfo,
+            extensions: {
+              ...tokenInfo.extensions,
+              coingeckoId: "terrausd",
+            }
+          }
+        }
         coingeckoTokenMap[tokenInfo.address] = tokenInfo;
-        coingeckoIds.add(tokenInfo.extensions.coingeckoId);
+        coingeckoIds.add(coingeckoId);
       }
     }
     const pages = chunks(Array.from(coingeckoIds), 250);
