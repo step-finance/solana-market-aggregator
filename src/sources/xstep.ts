@@ -1,6 +1,6 @@
 import { Connection, ConfirmOptions } from "@solana/web3.js";
 import { BN, Idl, Program, Provider, web3 } from "@project-serum/anchor";
-import type { Wallet } from "@project-serum/anchor/src/provider";
+import type { Wallet } from "@project-serum/anchor/dist/cjs/provider";
 
 import { MarketSource } from "./marketsource";
 import { MarketDataMap } from "../types/marketdata";
@@ -58,7 +58,7 @@ export class StakedStepMarketSource implements MarketSource {
    * @return Array containing one element which is xSTEP
    */
   async query(stepPrice: number): Promise<MarketDataMap> {
-    const res = await this.program.simulate.emitPrice({
+    const res = await this.program.simulate.emitPrice!({
       accounts: {
         tokenMint: new web3.PublicKey(STEP_MINT),
         xTokenMint: new web3.PublicKey(XSTEP_MINT),
@@ -66,7 +66,7 @@ export class StakedStepMarketSource implements MarketSource {
       },
     });
 
-    const priceEvent = res.events[0].data as XStepPriceEvent;
+    const priceEvent = res.events[0]?.data as XStepPriceEvent;
     return {
       [XSTEP_MINT]: {
         source: "contract",

@@ -22,6 +22,10 @@ export const getMintInfoMap = async (
   );
   return array.reduce<MintInfoMap>((map, tokenAccount, index) => {
     const address = keys[index];
+    if (!address) {
+      return map;
+    }
+
     try {
       const {
         decimals,

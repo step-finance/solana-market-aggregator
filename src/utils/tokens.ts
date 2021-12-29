@@ -144,7 +144,7 @@ const getDevnetStepAMMTokenInfos = async (
     );
 
     return rawMintArray.map((rawMint, index) => {
-      const address = keys[index];
+      const address = keys[index]!;
       const { decimals } = deserializeMint(rawMint.data);
       return {
         address,

@@ -65,15 +65,18 @@ export class CoinGeckoMarketSource implements MarketSource {
     return Object.values(coingeckoTokenMap).reduce<MarketDataMap>(
       (map, { address, symbol, extensions }) => {
         const price = coingeckoPriceMap[extensions.coingeckoId];
-        return {
-          ...map,
-          [address]: {
-            source: "coingecko",
-            symbol,
-            address,
-            price,
-          },
-        };
+        if (price) {
+          return {
+            ...map,
+            [address]: {
+              source: "coingecko",
+              symbol,
+              address,
+              price,
+            },
+          };
+        }
+        return map;
       },
       {}
     );

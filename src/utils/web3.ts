@@ -32,9 +32,10 @@ export const getMultipleAccounts = async (
   const keysThatExist: string[] = [];
   const array: AccountInfo<Buffer>[] = [];
   for (let i = 0; i < result.length; i++) {
+    const key = keys[i];
     const account = result[i];
-    if (account) {
-      keysThatExist.push(keys[i]);
+    if (key && account) {
+      keysThatExist.push(key);
       array.push(account);
     }
   }
