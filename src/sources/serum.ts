@@ -77,7 +77,9 @@ export class SerumMarketSource implements MarketSource {
     );
     array.forEach((item, index) => {
       const marketAddress = keys[index];
-      cache.add(marketAddress, item, DexMarketParser);
+      if (marketAddress) {
+        cache.add(marketAddress, item, DexMarketParser);
+      }
     });
 
     await this.updatePrices();
@@ -89,7 +91,7 @@ export class SerumMarketSource implements MarketSource {
       const tokenInfo = this.tokenMap[baseMintAddress];
       const isUSDQuote = USD_MINTS.has(quoteMintAddress);
       if (tokenInfo && isUSDQuote) {
-        const { address, symbol } = this.tokenMap[baseMintAddress];
+        const { address, symbol } = tokenInfo;
         marketDataMap[address] = {
           source: "serum",
           symbol,
@@ -135,9 +137,9 @@ export class SerumMarketSource implements MarketSource {
         return array
           .map((item, index) => {
             const address = keys[index];
-            if (accountsToQuery.has(address)) {
+            if (address && accountsToQuery.has(address)) {
               return cache.add(new PublicKey(address), item);
-            } else if (mintsToQuery.has(address)) {
+            } else if (address && mintsToQuery.has(address)) {
               return cache.addMint(new PublicKey(address), item);
             } else {
               return undefined;
@@ -196,12 +198,12 @@ export class SerumMarketSource implements MarketSource {
       const bestBid = bidsBook.getL2(1);
       const bestAsk = asksBook.getL2(1);
 
-      if (bestBid.length > 0) {
+      if (bestBid[0]) {
         bid = bestBid[0][0];
         price = bid;
       }
 
-      if (bestAsk.length > 0) {
+      if (bestAsk[0]) {
         ask = bestAsk[0][0];
         price = ask;
       }
