@@ -1,6 +1,6 @@
 {
   "name": "@stepfinance/solana-market-aggregator",
-  "version": "1.8.0",
+  "version": "1.8.1",
   "description": "Aggregates token prices using CoinGecko and Serum Markets",
   "license": "MIT",
   "author": "Step <dev@step.finance>",
