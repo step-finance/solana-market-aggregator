@@ -39,11 +39,13 @@ export class StakedInvictusMarketSource implements MarketSource {
       STAKED_INVICTUS_VAULT,
       TokenAccountParser
     );
-    const stakedInvictusMint = cache.getMint(STAKED_INVICTUS_MINT);
+    const stakedInvictusMint = await cache.queryMint(
+      this.connection,
+      STAKED_INVICTUS_MINT
+    );
     const totalInvictusStaked = stakedVault.info.amount;
     const invictusRatio =
-      totalInvictusStaked /
-      (stakedInvictusMint?.supply.toNumber() ?? totalInvictusStaked);
+      totalInvictusStaked / stakedInvictusMint.supply.toNumber();
 
     const stakedInvictusPrice = invictusMarketData.price * invictusRatio;
 
