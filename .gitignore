@@ -2,3 +2,4 @@ dist/
 dist.browser/
 *.log
 node_modules
+.env

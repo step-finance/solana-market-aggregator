@@ -72,8 +72,7 @@ const testTokenMap: TokenMap = {
     },
   },
 };
-const endpoint = "https://api.mainnet-beta.solana.com/";
-const connection = new Connection(endpoint);
+const connection = new Connection(process.env.MAINNET_ENDPOINT!);
 
 describe("Serum Source", () => {
   it("requests market prices", async () => {

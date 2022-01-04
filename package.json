@@ -21,7 +21,7 @@
     "dist"
   ],
   "scripts": {
-    "test": "mocha",
+    "test": "mocha -r dotenv-defaults/config",
     "lint": "eslint src/ --ext .js,.jsx,.ts,.tsx",
     "build": "tsc -p tsconfig.json",
     "clean": "rm -rf dist build",
@@ -40,6 +40,8 @@
     "@typescript-eslint/eslint-plugin": "^5.4.0",
     "@typescript-eslint/parser": "^5.4.0",
     "chai": "^4.3.4",
+    "dotenv": "^10.0.0",
+    "dotenv-defaults": "^3.0.0",
     "eslint": "^8.3.0",
     "eslint-config-standard": "^16.0.3",
     "eslint-plugin-import": "^2.25.3",
