@@ -84,9 +84,9 @@ const TEST_TOKEN_MAP: TokenMap = {
 describe("CoinGecko Source", () => {
   let prices: MarketDataMap;
 
-  before(async() => {
+  before(async () => {
     prices = await new CoinGeckoMarketSource().query(TEST_TOKEN_MAP);
-  })
+  });
 
   it("requests market prices for given tokens in token map", () => {
     expect(prices).to.include.keys([
@@ -98,18 +98,16 @@ describe("CoinGecko Source", () => {
   });
 
   it("properly sets market data values", () => {
-    const wrappedSOLMarketData =
-      prices[WRAPPED_SOL_ADDRESS];
+    const wrappedSOLMarketData = prices[WRAPPED_SOL_ADDRESS]!;
     expect(wrappedSOLMarketData.source).to.equal("coingecko");
     expect(wrappedSOLMarketData.address).to.equal(WRAPPED_SOL_ADDRESS);
     expect(wrappedSOLMarketData.symbol).to.equal("WSOL");
     expect(wrappedSOLMarketData.price).to.be.a("number");
     expect(wrappedSOLMarketData.metadata).to.be.undefined;
-  })
+  });
 
   it("Overrides TerraUSD coins with malformed CoinGecko ID", () => {
-    const wrappedUSTMarketData =
-      prices[UST_ADDRESS];
+    const wrappedUSTMarketData = prices[UST_ADDRESS]!;
     expect(wrappedUSTMarketData.source).to.equal("coingecko");
     expect(wrappedUSTMarketData.address).to.equal(UST_ADDRESS);
     expect(wrappedUSTMarketData.symbol).to.equal("swtUST-9");

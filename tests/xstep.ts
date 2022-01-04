@@ -18,8 +18,8 @@ describe("xSTEP source", () => {
     const xStepMarketData = (await xStepSource.query(mockedStepPrice))[
       XSTEP_MINT
     ];
-    expect(staticXStepMarketData.price * mockedStepPrice).to.equal(
-      xStepMarketData.price
+    expect(staticXStepMarketData!.price * mockedStepPrice).to.equal(
+      xStepMarketData!.price
     );
   });
 });
