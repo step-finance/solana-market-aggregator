@@ -22,8 +22,7 @@
   ],
   "scripts": {
     "test": "mocha -r dotenv-defaults/config",
-    "lint": "eslint src/ --ext .js,.jsx,.ts,.tsx",
-    "build": "tsc -p tsconfig.json",
+    "build": "tsc -p tsconfig.build.json",
     "clean": "rm -rf dist build",
     "prepublishOnly": "npm run clean && npm run build"
   },
