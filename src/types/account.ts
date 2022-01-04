@@ -20,7 +20,9 @@ export interface ParsedAccountBase {
 }
 
 export type AccountParser = (
+  // eslint-disable-next-line no-unused-vars
   pubkey: PublicKey,
+  // eslint-disable-next-line no-unused-vars
   data: AccountInfo<Buffer>
 ) => ParsedAccountBase | undefined;
 
