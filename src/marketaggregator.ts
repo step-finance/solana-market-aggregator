@@ -4,7 +4,6 @@ import {
   StakedStepMarketSource,
   StakedInvictusMarketSource,
   STEP_MINT,
-  INVICTUS_MINT,
 } from "./sources";
 import {
   ISerumMarketInfo,
@@ -109,11 +108,8 @@ export class MarketAggregator {
       const xStepDataMap = await this.xStep.query(stepMarketData.price);
       markets = { ...markets, ...xStepDataMap };
     }
-    const invictusMarketData = coingeckoMarketDataMap[INVICTUS_MINT];
-    if (invictusMarketData) {
-      const invictusDataMap = await this.sIN.query(invictusMarketData.price);
-      markets = { ...markets, ...invictusDataMap };
-    }
+    const stakedInvictusDataMap = await this.sIN.query(markets);
+    markets = { ...markets, ...stakedInvictusDataMap };
 
     const mintInfo = await getMintInfoMap(this.connection, this.tokenMap);
 

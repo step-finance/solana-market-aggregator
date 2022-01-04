@@ -1,7 +1,7 @@
 import { Connection } from "@solana/web3.js";
 
 import { MarketSource } from "./marketsource";
-import { MarketDataMap } from "../types/marketdata";
+import type { MarketDataMap } from "../types/marketdata";
 import { cache, TokenAccountParser } from "../utils/account";
 
 export const INVICTUS_MINT = "inL8PMVd6iiW3RCBJnr5AsrRN6nqr4BTrcNuQWQSkvY";
@@ -28,7 +28,12 @@ export class StakedInvictusMarketSource implements MarketSource {
    *
    * @return Array containing one element which is sIN
    */
-  async query(invictusPrice: number): Promise<MarketDataMap> {
+  async query(marketDataMap: MarketDataMap): Promise<MarketDataMap> {
+    const invictusMarketData = marketDataMap[INVICTUS_MINT];
+    if (!invictusMarketData) {
+      return {};
+    }
+
     const stakedVault = await cache.query(
       this.connection,
       STAKED_INVICTUS_VAULT,
@@ -36,11 +41,11 @@ export class StakedInvictusMarketSource implements MarketSource {
     );
     const stakedInvictusMint = cache.getMint(STAKED_INVICTUS_MINT);
     const totalInvictusStaked = stakedVault.info.amount;
-    const invuctusRatio =
+    const invictusRatio =
       totalInvictusStaked /
       (stakedInvictusMint?.supply.toNumber() ?? totalInvictusStaked);
 
-    const stakedInvictusPrice = invictusPrice * invuctusRatio;
+    const stakedInvictusPrice = invictusMarketData.price * invictusRatio;
 
     return {
       [STAKED_INVICTUS_MINT]: {

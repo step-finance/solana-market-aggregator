@@ -3,27 +3,43 @@ import { expect } from "chai";
 import "mocha";
 
 import {
+  INVICTUS_MINT,
   StakedInvictusMarketSource,
   STAKED_INVICTUS_MINT,
 } from "../src/sources/invictus";
+import { MarketDataMap } from "../src/types";
 
-describe("Staked Invicuts source", () => {
+describe("Staked Invictus source", () => {
   it("Loads price relative to Invictus", async () => {
-    const staticInvicutsPrice = 1;
-    const mockedInvictusPrice = 1000;
+    const staticInvictusMarketData: MarketDataMap = {
+      [INVICTUS_MINT]: {
+        address: INVICTUS_MINT,
+        source: "coingecko",
+        symbol: "IN",
+        price: 1,
+      },
+    };
+    const mockedInvictusMarketData: MarketDataMap = {
+      [INVICTUS_MINT]: {
+        address: INVICTUS_MINT,
+        source: "coingecko",
+        symbol: "IN",
+        price: 1000,
+      },
+    };
 
-    const endpoint = "https://api.mainnet-beta.solana.com/";
     const InvictusSource = new StakedInvictusMarketSource(
-      new Connection(endpoint)
+      new Connection(process.env.MAINNET_ENDPOINT!)
     );
     const staticStakedInvictusData = (
-      await InvictusSource.query(staticInvicutsPrice)
-    )[STAKED_INVICTUS_MINT];
+      await InvictusSource.query(staticInvictusMarketData)
+    )[STAKED_INVICTUS_MINT]!;
     const stakedInvictusMarketData = (
-      await InvictusSource.query(mockedInvictusPrice)
-    )[STAKED_INVICTUS_MINT];
-    expect(staticStakedInvictusData.price * mockedInvictusPrice).to.equal(
-      stakedInvictusMarketData.price
-    );
+      await InvictusSource.query(mockedInvictusMarketData)
+    )[STAKED_INVICTUS_MINT]!;
+    expect(
+      staticStakedInvictusData.price *
+        mockedInvictusMarketData[INVICTUS_MINT]!.price
+    ).to.equal(stakedInvictusMarketData.price);
   });
 });
