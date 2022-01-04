@@ -9,8 +9,9 @@ describe("xSTEP source", () => {
     const staticStepPrice = 1;
     const mockedStepPrice = 1000;
 
-    const endpoint = "https://api.devnet.solana.com/";
-    const xStepSource = new StakedStepMarketSource(new Connection(endpoint));
+    const xStepSource = new StakedStepMarketSource(
+      new Connection(process.env.DEVNET_ENDPOINT!)
+    );
     const staticXStepMarketData = (await xStepSource.query(staticStepPrice))[
       XSTEP_MINT
     ];
