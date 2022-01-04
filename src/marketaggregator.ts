@@ -1,8 +1,8 @@
-import { Cluster, Connection, ConnectionConfig } from "@solana/web3.js";
 import {
   CoinGeckoMarketSource,
   SerumMarketSource,
   StakedStepMarketSource,
+  StakedInvictusMarketSource,
   STEP_MINT,
 } from "./sources";
 import {
@@ -15,6 +15,7 @@ import { getTokenMap } from "./utils/tokens";
 import { getMintInfoMap } from "./utils/mints";
 import { getSerumMarketInfoMap } from "./utils/serum";
 import { getStarAtlasData } from "./utils/star-atlas";
+import { Cluster, Connection, ConnectionConfig } from "@solana/web3.js";
 
 export type MarketAggregatorConnectionConfig = ConnectionConfig & {
   endpoint: string;
@@ -30,6 +31,7 @@ export class MarketAggregator {
   tokenMap: TokenMap = {};
   serumMarkets: ISerumMarketInfo[] = [];
   xStep: StakedStepMarketSource;
+  sIN: StakedInvictusMarketSource;
   // Map of tokens without CoinGecko IDs
   private serumTokenMap: TokenMap = {};
 
@@ -38,6 +40,7 @@ export class MarketAggregator {
     this.connection = new Connection(endpoint, web3ConnectionConfig);
     this.cluster = cluster;
     this.xStep = new StakedStepMarketSource(this.connection);
+    this.sIN = new StakedInvictusMarketSource(this.connection);
   }
 
   /**
@@ -105,6 +108,8 @@ export class MarketAggregator {
       const xStepDataMap = await this.xStep.query(stepMarketData.price);
       markets = { ...markets, ...xStepDataMap };
     }
+    const stakedInvictusDataMap = await this.sIN.query(markets);
+    markets = { ...markets, ...stakedInvictusDataMap };
 
     const mintInfo = await getMintInfoMap(this.connection, this.tokenMap);
 
