@@ -96,7 +96,7 @@ describe("Serum Source", () => {
     );
     const serumSources = await serumMarketSource.query();
     const serumSource =
-      serumSources["So11111111111111111111111111111111111111112"];
+      serumSources["So11111111111111111111111111111111111111112"]!;
     expect(serumSource.metadata).to.exist;
     expect(serumSource.metadata!.marketPrices).to.have.all.keys(
       "bid",
