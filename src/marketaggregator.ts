@@ -114,7 +114,7 @@ export class MarketAggregator {
   /**
    * Instantiate staked sources
    *
-   * A staked source expects a single number (price) parameter for `query`
+   * A staked source expects a MarketDataMap parameter for `query` for price lookups
    */
   private setupStakedSources() {
     this.stakedSources.push(new StakedStepMarketSource(this.connection));
