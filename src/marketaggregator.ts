@@ -3,7 +3,7 @@ import {
   SerumMarketSource,
   StakedStepMarketSource,
   StakedInvictusMarketSource,
-  STEP_MINT,
+  MarketSource,
 } from "./sources";
 import {
   ISerumMarketInfo,
@@ -30,8 +30,7 @@ export class MarketAggregator {
   readonly cluster: Cluster;
   tokenMap: TokenMap = {};
   serumMarkets: ISerumMarketInfo[] = [];
-  xStep: StakedStepMarketSource;
-  sIN: StakedInvictusMarketSource;
+  stakedSources: MarketSource[] = [];
   // Map of tokens without CoinGecko IDs
   private serumTokenMap: TokenMap = {};
 
@@ -39,8 +38,7 @@ export class MarketAggregator {
     const { endpoint, cluster, ...web3ConnectionConfig } = config;
     this.connection = new Connection(endpoint, web3ConnectionConfig);
     this.cluster = cluster;
-    this.xStep = new StakedStepMarketSource(this.connection);
-    this.sIN = new StakedInvictusMarketSource(this.connection);
+    this.setupStakedSources();
   }
 
   /**
@@ -48,7 +46,7 @@ export class MarketAggregator {
    *
    * @return Boolean indicating success state
    */
-  async queryLists(): Promise<boolean> {
+  public async queryLists(): Promise<boolean> {
     try {
       const tokenMap = await getTokenMap(this.connection, this.cluster);
       const { tokenMap: starAtlasTokenMap, markets: starAtlasSerumMarkets } =
@@ -79,7 +77,7 @@ export class MarketAggregator {
    *
    * @return Array of market datas
    */
-  async querySources(): Promise<MarketSourcesData> {
+  public async querySources(): Promise<MarketSourcesData> {
     // Ensure lists have always been queried at least once
     if (
       Object.keys(this.tokenMap).length === 0 ||
@@ -103,16 +101,23 @@ export class MarketAggregator {
       ...coingeckoMarketDataMap,
     };
 
-    const stepMarketData = coingeckoMarketDataMap[STEP_MINT];
-    if (stepMarketData) {
-      const xStepDataMap = await this.xStep.query(stepMarketData.price);
-      markets = { ...markets, ...xStepDataMap };
+    for await (const source of this.stakedSources) {
+      const sourceDataMap = await source.query(markets);
+      markets = { ...markets, ...sourceDataMap };
     }
-    const stakedInvictusDataMap = await this.sIN.query(markets);
-    markets = { ...markets, ...stakedInvictusDataMap };
 
     const mintInfo = await getMintInfoMap(this.connection, this.tokenMap);
 
     return { markets, mintInfo };
+  }
+
+  /**
+   * Instantiate staked sources
+   *
+   * A staked source expects a single number (price) parameter for `query`
+   */
+  private setupStakedSources() {
+    this.stakedSources.push(new StakedStepMarketSource(this.connection));
+    this.stakedSources.push(new StakedInvictusMarketSource(this.connection));
   }
 }
