@@ -57,7 +57,12 @@ export class StakedStepMarketSource implements MarketSource {
    *
    * @return Array containing one element which is xSTEP
    */
-  async query(stepPrice: number): Promise<MarketDataMap> {
+  async query(marketDataMap: MarketDataMap): Promise<MarketDataMap> {
+    const xStepMarketData = marketDataMap[STEP_MINT];
+    if (!xStepMarketData) {
+      return {};
+    }
+
     const res = await this.program.simulate.emitPrice!({
       accounts: {
         tokenMint: new web3.PublicKey(STEP_MINT),
@@ -72,7 +77,7 @@ export class StakedStepMarketSource implements MarketSource {
         source: "contract",
         symbol: "xSTEP",
         address: XSTEP_MINT,
-        price: Number(priceEvent.stepPerXstep) * stepPrice,
+        price: Number(priceEvent.stepPerXstep) * xStepMarketData.price,
       },
     };
   }
