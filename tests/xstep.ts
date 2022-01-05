@@ -38,8 +38,7 @@ describe("xSTEP source", () => {
       XSTEP_MINT
     ];
     expect(
-      staticXStepMarketData!.price *
-        (mockedStepMarketData[STEP_MINT]?.price ?? 0)
+      staticXStepMarketData!.price * mockedStepMarketData[STEP_MINT]!.price
     ).to.equal(xStepMarketData!.price);
   });
 });
