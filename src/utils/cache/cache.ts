@@ -2,15 +2,17 @@ import { deserializeMint } from "@saberhq/token-utils";
 import { MintInfo, TOKEN_PROGRAM_ID, u64 } from "@solana/spl-token";
 import { AccountInfo, Connection, PublicKey } from "@solana/web3.js";
 
-import { MintInfoMap, TokenAccount } from "../../types";
+import { MintInfoMap } from "../../types";
 import { BaseError } from "../errors";
-import { EventEmitter } from "./emitter";
 import {
   AccountParser,
   ParsedAccountBase,
   ParsedLocalTransaction,
+  TokenAccount,
   TokenAccountParser,
 } from "../parsers";
+
+import { EventEmitter } from "./emitter";
 
 // Arbitrary mint to represent SOL (not wrapped SOL).
 const SOL_MINT = new PublicKey("Ejmc1UB4EsES5oAaRN63SpoxMJidt3ZGBrqrZk49vjTZ");
