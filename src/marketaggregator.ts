@@ -101,7 +101,7 @@ export class MarketAggregator {
       ...coingeckoMarketDataMap,
     };
 
-    for await (const source of this.stakedSources) {
+    for (const source of this.stakedSources) {
       const sourceDataMap = await source.query(markets);
       markets = { ...markets, ...sourceDataMap };
     }
