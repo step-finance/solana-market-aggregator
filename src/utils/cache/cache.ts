@@ -17,7 +17,17 @@ import { EventEmitter } from "./emitter";
 // Arbitrary mint to represent SOL (not wrapped SOL).
 const SOL_MINT = new PublicKey("Ejmc1UB4EsES5oAaRN63SpoxMJidt3ZGBrqrZk49vjTZ");
 
-const getMintInfo = async (connection: Connection, pubKey: PublicKey) => {
+const getMintInfo = async (connection: Connection, pubKey: PublicKey): Promise<MintInfo> => {
+  if (pubKey.equals(SOL_MINT)) {
+    return {
+      mintAuthority: null,
+      supply: new u64(0),
+      decimals: 9,
+      isInitialized: true,
+      freezeAuthority: null,
+    }
+  }
+
   const info = await connection.getAccountInfo(pubKey);
   if (info === null) {
     throw new Error("Failed to find mint account");
