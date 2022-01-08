@@ -1,4 +1,9 @@
-import { AccountInfo, ConfirmedSignatureInfo, ConfirmedTransaction, PublicKey } from "@solana/web3.js";
+import {
+  AccountInfo,
+  ConfirmedSignatureInfo,
+  ConfirmedTransaction,
+  PublicKey,
+} from "@solana/web3.js";
 
 export interface ParsedAccountBase {
   pubkey: PublicKey;
@@ -16,5 +21,9 @@ export interface ParsedAccount<T> extends ParsedAccountBase {
   info: T;
 }
 
-// eslint-disable-next-line no-unused-vars
-export type AccountParser = (pubkey: PublicKey, data: AccountInfo<Buffer>) => ParsedAccountBase | undefined;
+export type AccountParser = (
+  // eslint-disable-next-line no-unused-vars
+  pubkey: PublicKey,
+  // eslint-disable-next-line no-unused-vars
+  data: AccountInfo<Buffer>
+) => ParsedAccountBase | undefined;

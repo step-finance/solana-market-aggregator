@@ -8,7 +8,10 @@ export interface TokenAccount {
   info: TokenAccountInfo;
 }
 
-export const TokenAccountParser = (pubKey: PublicKey, info: AccountInfo<Buffer>) => {
+export const TokenAccountParser = (
+  pubKey: PublicKey,
+  info: AccountInfo<Buffer>
+) => {
   const buffer = Buffer.from(info.data);
   const data = deserializeAccount(buffer);
 
