@@ -17,11 +17,11 @@ declare module "buffer-layout" {
 
     offsetOf(property: string): number;
   }
-  export class Blob<T = Buffer> extends Layout<T> { }
+  export class Blob<T = Buffer> extends Layout<T> {}
   export class Union extends Layout {
     addVariant(variant: Number, layout: Layout, property: string);
   }
-  export class UInt<T = number> extends Layout<T> { }
+  export class UInt<T = number> extends Layout<T> {}
   export function greedy(
     elementSpan?: number,
     property?: string

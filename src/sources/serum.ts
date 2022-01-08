@@ -4,9 +4,10 @@ import { Market, Orderbook } from "@project-serum/serum";
 
 import { MarketSource } from "./marketsource";
 import { MarketDataMap } from "../types/marketdata";
-import { DexMarketParser, ISerumMarketInfo, TokenMap } from "../types";
-import { cache } from "../utils/account";
+import { ISerumMarketInfo, TokenMap } from "../types";
 import { getMultipleAccounts } from "../utils/web3";
+import { DexMarketParser } from "../utils/parsers";
+import { cache } from "../utils/cache";
 
 export const SERUM_PROGRAM_ID_V3 =
   "9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin";

@@ -37,8 +37,8 @@ export class CoinGeckoMarketSource implements MarketSource {
             extensions: {
               ...tokenInfo.extensions,
               coingeckoId: "terrausd",
-            }
-          }
+            },
+          };
         }
         coingeckoTokenMap[tokenInfo.address] = tokenInfo;
         coingeckoIds.add(coingeckoId);
