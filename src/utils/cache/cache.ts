@@ -294,3 +294,5 @@ export const cache = {
     cache.emitter.raiseCacheCleared();
   },
 };
+
+export type Cache = typeof cache;
