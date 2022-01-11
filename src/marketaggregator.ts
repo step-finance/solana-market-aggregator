@@ -16,6 +16,7 @@ import { getMintInfoMap } from "./utils/mints";
 import { getSerumMarketInfoMap } from "./utils/serum";
 import { getStarAtlasData } from "./utils/star-atlas";
 import { Cluster, Connection, ConnectionConfig } from "@solana/web3.js";
+import { MSRMMarketSource } from "./sources/msrm";
 
 export type MarketAggregatorConnectionConfig = ConnectionConfig & {
   endpoint: string;
@@ -119,5 +120,6 @@ export class MarketAggregator {
   private setupStakedSources() {
     this.stakedSources.push(new StakedStepMarketSource(this.connection));
     this.stakedSources.push(new StakedInvictusMarketSource(this.connection));
+    this.stakedSources.push(new MSRMMarketSource());
   }
 }
