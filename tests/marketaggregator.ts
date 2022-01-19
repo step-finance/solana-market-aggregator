@@ -8,6 +8,8 @@ const EXAMPLE_DEVNET_TOKEN = "7XWr8fagdZS4mrXUFexQrCd2nYxahR6AtuQkcF2AYecq";
 // Saber
 const AEMIM_ADDRESS = "2ASbApnFVSTp2RJvMLgLVfbDwJvu1FRXdhJWrGs89Lhj";
 const SUSD8_ADDRESS = "88881Hu2jGMfCs9tMu5Rr7Ah7WBNBuXqde4nR5ZmKYYy";
+const aeDAI = "9w6LpS7RU1DKftiwH3NgShtXbkMM1ke9iNU4g3MBXSUs";
+const renLUNASaber = "KUANeD8EQvwpT1W7QZDtDqctLEh2FfSTy5pThE9CogT";
 
 describe("Market Aggregator", () => {
   describe("#queryLists", () => {
@@ -22,6 +24,13 @@ describe("Market Aggregator", () => {
       // Spot check Saber tokens
       expect(aggregator.tokenMap).to.haveOwnProperty(AEMIM_ADDRESS);
       expect(aggregator.tokenMap).to.haveOwnProperty(SUSD8_ADDRESS);
+      expect(aggregator.tokenMap).to.haveOwnProperty(aeDAI);
+
+      const dai = aggregator.tokenMap[aeDAI];
+      expect(dai?.extensions?.coingeckoId).to.eq("dai");
+
+      const lunaSaber = aggregator.tokenMap[renLUNASaber];
+      expect(lunaSaber?.extensions?.coingeckoId).to.eq("terra-luna");
     });
 
     it("queries mints from Step swap pool registry on devnet", async () => {

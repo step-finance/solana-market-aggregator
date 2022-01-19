@@ -6,7 +6,7 @@ import {
   TokenListContainer,
   TokenListProvider,
 } from "@solana/spl-token-registry";
-import { deserializeMint } from "@saberhq/token-utils";
+import { deserializeMint, token } from "@saberhq/token-utils";
 import {
   STEP_SWAP_OWNER,
   STEP_SWAP_PROGRAM_ID,
@@ -78,10 +78,11 @@ export const getTokenMap = async (
     .excludeByTag("saber-hidden")
     .getList();
 
-  for (const tokenInfo of saberTokenInfos) {
+  for (let tokenInfo of saberTokenInfos) {
     const { address } = tokenInfo;
     try {
       new PublicKey(address);
+      tokenInfo = overrideCoingeckoId(tokenInfo);
       tokenMap[address] = tokenInfo;
     } catch (e) {
       console.error(e);
@@ -102,6 +103,34 @@ export const getTokenMap = async (
   }
 
   return tokenMap;
+};
+
+const overrideCoingeckoId = (tokenInfo: TokenInfo): TokenInfo => {
+  let castTokenInfo = tokenInfo as any;
+
+  const coingeckoId = tokenInfo.extensions?.coingeckoId;
+  if (coingeckoId) {
+    switch (coingeckoId) {
+      case "multi-collateral-dai":
+        castTokenInfo.extensions.coingeckoId = "dai";
+        break;
+      case "wrapped-bitcoin":
+        castTokenInfo.extensions.coingeckoId = "bitcoin";
+        break;
+      case "terra-usd":
+        castTokenInfo.extensions.coingeckoId = "terrausd";
+        break;
+    }
+  } else {
+    const tags = tokenInfo.tags ?? [];
+    if (tags.includes("saber-mkt-luna")) {
+      castTokenInfo.extensions.coingeckoId = "terra-luna";
+    } else if (tags.includes("saber-mkt-sol")) {
+      castTokenInfo.extensions.coingeckoId = "solana";
+    }
+  }
+
+  return castTokenInfo as TokenInfo;
 };
 
 const getDevnetStepAMMTokenInfos = async (
