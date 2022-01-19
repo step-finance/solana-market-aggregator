@@ -6,7 +6,7 @@ import {
   TokenListContainer,
   TokenListProvider,
 } from "@solana/spl-token-registry";
-import { deserializeMint, token } from "@saberhq/token-utils";
+import { deserializeMint } from "@saberhq/token-utils";
 import {
   STEP_SWAP_OWNER,
   STEP_SWAP_PROGRAM_ID,
@@ -15,7 +15,11 @@ import {
 } from "@stepfinance/step-swap";
 import axios from "axios";
 import { getMultipleAccounts } from "./web3";
-import { TokenMap } from "../types";
+import {
+  TokenMap,
+  TokenInfoWithCoingeckoId,
+  tokenInfoHasCoingeckoId,
+} from "../types";
 
 // shorten the checksummed version of the input address to have 4 characters at start and end
 export function shortenAddress(address: string, chars = 4): string {
@@ -78,12 +82,11 @@ export const getTokenMap = async (
     .excludeByTag("saber-hidden")
     .getList();
 
-  for (let tokenInfo of saberTokenInfos) {
+  for (const tokenInfo of saberTokenInfos) {
     const { address } = tokenInfo;
     try {
       new PublicKey(address);
-      tokenInfo = overrideCoingeckoId(tokenInfo);
-      tokenMap[address] = tokenInfo;
+      tokenMap[address] = overrideCoingeckoId(tokenInfo);
     } catch (e) {
       console.error(e);
     }
@@ -106,31 +109,58 @@ export const getTokenMap = async (
 };
 
 const overrideCoingeckoId = (tokenInfo: TokenInfo): TokenInfo => {
-  let castTokenInfo = tokenInfo as any;
-
-  const coingeckoId = tokenInfo.extensions?.coingeckoId;
-  if (coingeckoId) {
-    switch (coingeckoId) {
+  let updatedTokenInfo: TokenInfoWithCoingeckoId | undefined;
+  if (tokenInfoHasCoingeckoId(tokenInfo)) {
+    switch (tokenInfo.extensions.coingeckoId) {
       case "multi-collateral-dai":
-        castTokenInfo.extensions.coingeckoId = "dai";
+        updatedTokenInfo = {
+          ...tokenInfo,
+          extensions: {
+            ...tokenInfo.extensions,
+            coingeckoId: "dai",
+          },
+        };
         break;
       case "wrapped-bitcoin":
-        castTokenInfo.extensions.coingeckoId = "bitcoin";
+        updatedTokenInfo = {
+          ...tokenInfo,
+          extensions: {
+            ...tokenInfo.extensions,
+            coingeckoId: "bitcoin",
+          },
+        };
         break;
       case "terra-usd":
-        castTokenInfo.extensions.coingeckoId = "terrausd";
+        updatedTokenInfo = {
+          ...tokenInfo,
+          extensions: {
+            ...tokenInfo.extensions,
+            coingeckoId: "terrausd",
+          },
+        };
         break;
     }
   } else {
     const tags = tokenInfo.tags ?? [];
     if (tags.includes("saber-mkt-luna")) {
-      castTokenInfo.extensions.coingeckoId = "terra-luna";
+      updatedTokenInfo = {
+        ...tokenInfo,
+        extensions: {
+          ...tokenInfo.extensions,
+          coingeckoId: "terra-luna",
+        },
+      };
     } else if (tags.includes("saber-mkt-sol")) {
-      castTokenInfo.extensions.coingeckoId = "solana";
+      updatedTokenInfo = {
+        ...tokenInfo,
+        extensions: {
+          ...tokenInfo.extensions,
+          coingeckoId: "solana",
+        },
+      };
     }
   }
-
-  return castTokenInfo as TokenInfo;
+  return updatedTokenInfo ? updatedTokenInfo : tokenInfo;
 };
 
 const getDevnetStepAMMTokenInfos = async (
