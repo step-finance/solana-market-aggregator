@@ -30,7 +30,7 @@ export class CoinGeckoMarketSource implements MarketSource {
         let tokenInfo: TokenInfoWithCoingeckoId = baseTokenInfo;
         let coingeckoId: string = tokenInfo.extensions.coingeckoId;
         // Hack to work around TerraUSD CoinGecko ID mismapping
-        if (coingeckoId === "terra-usd") {
+        /*if (coingeckoId === "terra-usd") {
           coingeckoId = "terrausd";
           tokenInfo = {
             ...tokenInfo,
@@ -39,7 +39,7 @@ export class CoinGeckoMarketSource implements MarketSource {
               coingeckoId: "terrausd",
             },
           };
-        }
+        }*/
         coingeckoTokenMap[tokenInfo.address] = tokenInfo;
         coingeckoIds.add(coingeckoId);
       }

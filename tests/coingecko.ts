@@ -75,7 +75,7 @@ const TEST_TOKEN_MAP: TokenMap = {
       address: "uusd",
       bridgeContract:
         "https://finder.terra.money/columbus-5/address/terra10nmmwe8r3g99a9newtqa7a75xfgs2e8z87r2sf",
-      coingeckoId: "terra-usd",
+      coingeckoId: "terrausd",
       website: "https://app.saber.so",
     },
   },
@@ -106,12 +106,12 @@ describe("CoinGecko Source", () => {
     expect(wrappedSOLMarketData.metadata).to.be.undefined;
   });
 
-  it("Overrides TerraUSD coins with malformed CoinGecko ID", () => {
+  /*it("Overrides TerraUSD coins with malformed CoinGecko ID", () => {
     const wrappedUSTMarketData = prices[UST_ADDRESS]!;
     expect(wrappedUSTMarketData.source).to.equal("coingecko");
     expect(wrappedUSTMarketData.address).to.equal(UST_ADDRESS);
     expect(wrappedUSTMarketData.symbol).to.equal("swtUST-9");
     expect(wrappedUSTMarketData.price).to.be.a("number");
     expect(wrappedUSTMarketData.metadata).to.be.undefined;
-  });
+  });*/
 });
