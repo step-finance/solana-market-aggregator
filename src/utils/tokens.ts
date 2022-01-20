@@ -15,7 +15,11 @@ import {
 } from "@stepfinance/step-swap";
 import axios from "axios";
 import { getMultipleAccounts } from "./web3";
-import { TokenMap } from "../types";
+import {
+  TokenMap,
+  TokenInfoWithCoingeckoId,
+  tokenInfoHasCoingeckoId,
+} from "../types";
 
 // shorten the checksummed version of the input address to have 4 characters at start and end
 export function shortenAddress(address: string, chars = 4): string {
@@ -82,7 +86,7 @@ export const getTokenMap = async (
     const { address } = tokenInfo;
     try {
       new PublicKey(address);
-      tokenMap[address] = tokenInfo;
+      tokenMap[address] = overrideCoingeckoId(tokenInfo);
     } catch (e) {
       console.error(e);
     }
@@ -102,6 +106,61 @@ export const getTokenMap = async (
   }
 
   return tokenMap;
+};
+
+const overrideCoingeckoId = (tokenInfo: TokenInfo): TokenInfo => {
+  let updatedTokenInfo: TokenInfoWithCoingeckoId | undefined;
+  if (tokenInfoHasCoingeckoId(tokenInfo)) {
+    switch (tokenInfo.extensions.coingeckoId) {
+      case "multi-collateral-dai":
+        updatedTokenInfo = {
+          ...tokenInfo,
+          extensions: {
+            ...tokenInfo.extensions,
+            coingeckoId: "dai",
+          },
+        };
+        break;
+      case "wrapped-bitcoin":
+        updatedTokenInfo = {
+          ...tokenInfo,
+          extensions: {
+            ...tokenInfo.extensions,
+            coingeckoId: "bitcoin",
+          },
+        };
+        break;
+      case "terra-usd":
+        updatedTokenInfo = {
+          ...tokenInfo,
+          extensions: {
+            ...tokenInfo.extensions,
+            coingeckoId: "terrausd",
+          },
+        };
+        break;
+    }
+  } else {
+    const tags = tokenInfo.tags ?? [];
+    if (tags.includes("saber-mkt-luna")) {
+      updatedTokenInfo = {
+        ...tokenInfo,
+        extensions: {
+          ...tokenInfo.extensions,
+          coingeckoId: "terra-luna",
+        },
+      };
+    } else if (tags.includes("saber-mkt-sol")) {
+      updatedTokenInfo = {
+        ...tokenInfo,
+        extensions: {
+          ...tokenInfo.extensions,
+          coingeckoId: "solana",
+        },
+      };
+    }
+  }
+  return updatedTokenInfo ? updatedTokenInfo : tokenInfo;
 };
 
 const getDevnetStepAMMTokenInfos = async (
