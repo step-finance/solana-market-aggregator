@@ -86,10 +86,19 @@ export const getTokenMap = async (
     const { address } = tokenInfo;
     try {
       new PublicKey(address);
-      tokenMap[address] = overrideCoingeckoId(tokenInfo);
+      const ti = tokenMap[address];
+      // Don't override if coingeckoId already exists
+      if (ti && ti.extensions?.coingeckoId === undefined) {
+        tokenMap[address] = tokenInfo;
+      }
     } catch (e) {
       console.error(e);
     }
+  }
+
+  for (const tokenInfo of Object.values(tokenMap)) {
+    const { address } = tokenInfo;
+    tokenMap[address] = overrideCoingeckoId(tokenInfo);
   }
 
   if (cluster === "devnet") {
@@ -139,27 +148,37 @@ const overrideCoingeckoId = (tokenInfo: TokenInfo): TokenInfo => {
           },
         };
         break;
-    }
-  } else {
-    const tags = tokenInfo.tags ?? [];
-    if (tags.includes("saber-mkt-luna")) {
-      updatedTokenInfo = {
-        ...tokenInfo,
-        extensions: {
-          ...tokenInfo.extensions,
-          coingeckoId: "terra-luna",
-        },
-      };
-    } else if (tags.includes("saber-mkt-sol")) {
-      updatedTokenInfo = {
-        ...tokenInfo,
-        extensions: {
-          ...tokenInfo.extensions,
-          coingeckoId: "solana",
-        },
-      };
+      case "wrapped-terra":
+        updatedTokenInfo = {
+          ...tokenInfo,
+          extensions: {
+            ...tokenInfo.extensions,
+            coingeckoId: "terra-luna",
+          },
+        };
+        break;
     }
   }
+
+  const tags = tokenInfo.tags ?? [];
+  if (tags.includes("saber-mkt-luna")) {
+    updatedTokenInfo = {
+      ...tokenInfo,
+      extensions: {
+        ...tokenInfo.extensions,
+        coingeckoId: "terra-luna",
+      },
+    };
+  } else if (tags.includes("saber-mkt-sol")) {
+    updatedTokenInfo = {
+      ...tokenInfo,
+      extensions: {
+        ...tokenInfo.extensions,
+        coingeckoId: "solana",
+      },
+    };
+  }
+
   return updatedTokenInfo ? updatedTokenInfo : tokenInfo;
 };
 
