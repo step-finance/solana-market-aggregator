@@ -63,6 +63,9 @@ export class StakedStepMarketSource implements MarketSource {
       return {};
     }
 
+    // Trial fix for intermittent BlockhashNotFound error.
+    await this.connection.getRecentBlockhash("max");
+
     const res = await this.program.simulate.emitPrice!({
       accounts: {
         tokenMint: new web3.PublicKey(STEP_MINT),

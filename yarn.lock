@@ -112,17 +112,17 @@
     snake-case "^3.0.4"
     toml "^3.0.0"
 
-"@project-serum/anchor@^0.18.2":
-  version "0.18.2"
-  resolved "https://registry.yarnpkg.com/@project-serum/anchor/-/anchor-0.18.2.tgz#0f13b5c2046446b7c24cf28763eec90febb28485"
-  integrity sha512-uyjiN/3Ipp+4hrZRm/hG18HzGLZyvP790LXrCsGO3IWxSl28YRhiGEpKnZycfMW94R7nxdUoE3wY67V+ZHSQBQ==
+"@project-serum/anchor@^0.20.1":
+  version "0.20.1"
+  resolved "https://registry.yarnpkg.com/@project-serum/anchor/-/anchor-0.20.1.tgz#0937807e807e8332aa708cfef4bcb6cbb88b4129"
+  integrity sha512-2TuBmGUn9qeYz6sJINJlElrBuPsaUAtYyUsJ3XplEBf1pczrANAgs5ceJUFzdiqGEWLn+84ObSdBeChT/AXYFA==
   dependencies:
     "@project-serum/borsh" "^0.2.2"
     "@solana/web3.js" "^1.17.0"
     base64-js "^1.5.1"
     bn.js "^5.1.2"
     bs58 "^4.0.1"
-    buffer-layout "^1.2.0"
+    buffer-layout "^1.2.2"
     camelcase "^5.3.1"
     crypto-hash "^1.3.0"
     eventemitter3 "^4.0.7"
@@ -140,10 +140,10 @@
     bn.js "^5.1.2"
     buffer-layout "^1.2.0"
 
-"@project-serum/serum@^0.13.60":
-  version "0.13.60"
-  resolved "https://registry.yarnpkg.com/@project-serum/serum/-/serum-0.13.60.tgz#abeb3355ebc1895d685250df5965f688502ebcbb"
-  integrity sha512-fGsp9F0ZAS48YQ2HNy+6CNoifJESFXxVsOLPd9QK1XNV8CTuQoECOnVXxV6s5cKGre8pLNq5hrhi5J6aCGauEQ==
+"@project-serum/serum@^0.13.61":
+  version "0.13.61"
+  resolved "https://registry.yarnpkg.com/@project-serum/serum/-/serum-0.13.61.tgz#1f0e6dfa7786a71e4317593911e9915d8b2a06e6"
+  integrity sha512-aebaRGQ0/K7a5kJ9UXO59BAQFJILVu5jbGobU8GD2CTSy6SPceprB6/pgZmZLQIabhXWUHaZRF/wXIClgWataA==
   dependencies:
     "@project-serum/anchor" "^0.11.1"
     "@solana/spl-token" "^0.1.6"
@@ -151,10 +151,10 @@
     bn.js "^5.1.2"
     buffer-layout "^1.2.0"
 
-"@saberhq/solana-contrib@^1.12.4":
-  version "1.12.4"
-  resolved "https://registry.yarnpkg.com/@saberhq/solana-contrib/-/solana-contrib-1.12.4.tgz#eb1381a4f3de5a0584b083a1eae90e6e2c2a8f30"
-  integrity sha512-0i61JKu+7SGYfdmzKTSYrPxlp/+eDBNXRyGKVFovGCo0Jw6RzUmVA2cX5QWbMP6aq0oOPYCMKWkn1TWkR+qzLg==
+"@saberhq/solana-contrib@^1.12.32":
+  version "1.12.32"
+  resolved "https://registry.yarnpkg.com/@saberhq/solana-contrib/-/solana-contrib-1.12.32.tgz#577f7462e7d18435c951a894f497f1195db75005"
+  integrity sha512-PYnoVmk6ByX85J4GzXUqFUyx1Yi1TvWrpDnptF87Kzc2CPl3Lkhnktbkc4JlMOZYenoknh2114zxn+vbQ3fNNQ==
   dependencies:
     "@types/promise-retry" "^1.1.3"
     "@types/retry" "^0.12.1"
@@ -163,12 +163,12 @@
     tiny-invariant "^1.2.0"
     tslib "^2.3.1"
 
-"@saberhq/token-utils@^1.12.4":
-  version "1.12.4"
-  resolved "https://registry.yarnpkg.com/@saberhq/token-utils/-/token-utils-1.12.4.tgz#7cf25bbc5694cb83a4522433864372db4f00a925"
-  integrity sha512-CXQBkopq/OBO+9hBQ2W1bwdN0IQ0/pE/ninIF/9LWopEd0nlYdzy+j0DqJ5wipl2l3Q4jb4dj5AbcJ4PRFkHPg==
+"@saberhq/token-utils@^1.12.32":
+  version "1.12.32"
+  resolved "https://registry.yarnpkg.com/@saberhq/token-utils/-/token-utils-1.12.32.tgz#36b31c1011e89d031d4fae0ae4a7a4f912d25e14"
+  integrity sha512-7/z8V5pR+mYPkNDO+oYJwzp6dgegRqvF05SK40oGToavvGiRayOOQxwdfan9Jf60LFz68hHwYZQkoRKsif5HAg==
   dependencies:
-    "@saberhq/solana-contrib" "^1.12.4"
+    "@saberhq/solana-contrib" "^1.12.32"
     "@solana/buffer-layout" "^4.0.0"
     "@solana/spl-token" "^0.1.8"
     "@ubeswap/token-math" "^4.4.1"
