@@ -158,25 +158,25 @@ const overrideCoingeckoId = (tokenInfo: TokenInfo): TokenInfo => {
         };
         break;
     }
-  }
-
-  const tags = tokenInfo.tags ?? [];
-  if (tags.includes("saber-mkt-luna")) {
-    updatedTokenInfo = {
-      ...tokenInfo,
-      extensions: {
-        ...tokenInfo.extensions,
-        coingeckoId: "terra-luna",
-      },
-    };
-  } else if (tags.includes("saber-mkt-sol")) {
-    updatedTokenInfo = {
-      ...tokenInfo,
-      extensions: {
-        ...tokenInfo.extensions,
-        coingeckoId: "solana",
-      },
-    };
+  } else {
+    const tags = tokenInfo.tags ?? [];
+    if (tags.includes("saber-mkt-luna")) {
+      updatedTokenInfo = {
+        ...tokenInfo,
+        extensions: {
+          ...tokenInfo.extensions,
+          coingeckoId: "terra-luna",
+        },
+      };
+    } else if (tags.includes("saber-mkt-sol")) {
+      updatedTokenInfo = {
+        ...tokenInfo,
+        extensions: {
+          ...tokenInfo.extensions,
+          coingeckoId: "solana",
+        },
+      };
+    }
   }
 
   return updatedTokenInfo ? updatedTokenInfo : tokenInfo;
