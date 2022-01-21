@@ -2,6 +2,7 @@ import {
   AccountInfo,
   Commitment,
   Connection,
+  ParsedAccountData,
   PublicKey,
 } from "@solana/web3.js";
 import { Buffer } from "buffer";
@@ -19,7 +20,7 @@ export const getMultipleAccounts = async (
   commitment: Commitment
 ): Promise<{
   keys: string[];
-  array: AccountInfo<Buffer>[];
+  array: AccountInfo<Buffer | ParsedAccountData>[];
 }> => {
   const publicKeys = keys.map((key) => new PublicKey(key));
   const result = (
@@ -30,7 +31,7 @@ export const getMultipleAccounts = async (
     )
   ).flat();
   const keysThatExist: string[] = [];
-  const array: AccountInfo<Buffer>[] = [];
+  const array: AccountInfo<Buffer | ParsedAccountData>[] = [];
   for (let i = 0; i < result.length; i++) {
     const key = keys[i];
     const account = result[i];
