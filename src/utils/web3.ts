@@ -14,6 +14,10 @@ export function chunks<T>(array: T[], size: number): T[][] {
   ).map((_, index) => array.slice(index * size, (index + 1) * size));
 }
 
+export const isAccountInfoBuffer = (
+  accountInfo: AccountInfo<Buffer | ParsedAccountData>
+): accountInfo is AccountInfo<Buffer> => Buffer.isBuffer(accountInfo.data);
+
 export const getMultipleAccounts = async (
   connection: Connection,
   keys: string[],

@@ -14,7 +14,7 @@ import {
   TokenSwapLayout as StepSwapLayout,
 } from "@stepfinance/step-swap";
 import axios from "axios";
-import { getMultipleAccounts } from "./web3";
+import { getMultipleAccounts, isAccountInfoBuffer } from "./web3";
 import {
   TokenMap,
   TokenInfoWithCoingeckoId,
@@ -204,14 +204,16 @@ const getDevnetStepAMMTokenInfos = async (
     );
     const mintSet = new Set<string>();
     array.forEach((accountInfo) => {
-      const poolRawData = StepSwapLayout.decode(accountInfo.data);
-      const mintAString = new PublicKey(poolRawData.mintA).toBase58();
-      const mintBString = new PublicKey(poolRawData.mintB).toBase58();
-      if (!tokenMap[mintAString]) {
-        mintSet.add(mintAString);
-      }
-      if (!tokenMap[mintBString]) {
-        mintSet.add(mintBString);
+      if (isAccountInfoBuffer(accountInfo)) {
+        const poolRawData = StepSwapLayout.decode(accountInfo.data);
+        const mintAString = new PublicKey(poolRawData.mintA).toBase58();
+        const mintBString = new PublicKey(poolRawData.mintB).toBase58();
+        if (!tokenMap[mintAString]) {
+          mintSet.add(mintAString);
+        }
+        if (!tokenMap[mintBString]) {
+          mintSet.add(mintBString);
+        }
       }
     });
 
@@ -221,21 +223,30 @@ const getDevnetStepAMMTokenInfos = async (
       "confirmed"
     );
 
-    return rawMintArray.map((rawMint, index) => {
-      const address = keys[index]!;
-      const { decimals } = deserializeMint(rawMint.data);
-      return {
-        address,
-        chainId: ENV.Devnet,
-        decimals,
-        name: shortenAddress(address),
-        symbol: shortenAddress(address),
-        extensions: {
-          // Default devnet tokens to stablecoin
-          coingeckoId: "usd-coin",
-        },
-      };
-    });
+    return rawMintArray.reduce<TokenInfo[]>(
+      (tokenInfoArray, rawMint, index) => {
+        const address = keys[index];
+        if (!address || !isAccountInfoBuffer(rawMint)) {
+          return tokenInfoArray;
+        }
+        const { decimals } = deserializeMint(rawMint.data);
+        return [
+          ...tokenInfoArray,
+          {
+            address,
+            chainId: ENV.Devnet,
+            decimals,
+            name: shortenAddress(address),
+            symbol: shortenAddress(address),
+            extensions: {
+              // Default devnet tokens to stablecoin
+              coingeckoId: "usd-coin",
+            },
+          },
+        ];
+      },
+      []
+    );
   }
 
   return [];
