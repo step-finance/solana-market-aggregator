@@ -1,7 +1,7 @@
 import { Connection } from "@solana/web3.js";
 import { deserializeMint } from "@saberhq/token-utils";
 import { TokenMap, MintInfoMap } from "../types";
-import { getMultipleAccounts } from "./web3";
+import { getMultipleAccounts, isAccountInfoBuffer } from "./web3";
 
 export type RawMintInfo = {
   mintAuthority: string | null;
@@ -22,7 +22,7 @@ export const getMintInfoMap = async (
   );
   return array.reduce<MintInfoMap>((map, tokenAccount, index) => {
     const address = keys[index];
-    if (!address) {
+    if (!address || !isAccountInfoBuffer(tokenAccount)) {
       return map;
     }
 

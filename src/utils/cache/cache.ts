@@ -1,6 +1,11 @@
 import { deserializeMint } from "@saberhq/token-utils";
 import { MintInfo, TOKEN_PROGRAM_ID, u64 } from "@solana/spl-token";
-import { AccountInfo, Connection, PublicKey } from "@solana/web3.js";
+import {
+  AccountInfo,
+  Connection,
+  ParsedAccountData,
+  PublicKey,
+} from "@solana/web3.js";
 
 import { MintInfoMap } from "../../types";
 import { BaseError } from "../errors";
@@ -11,13 +16,17 @@ import {
   TokenAccount,
   TokenAccountParser,
 } from "../parsers";
+import { isAccountInfoBuffer } from "../web3";
 
 import { EventEmitter } from "./emitter";
 
 // Arbitrary mint to represent SOL (not wrapped SOL).
 const SOL_MINT = new PublicKey("Ejmc1UB4EsES5oAaRN63SpoxMJidt3ZGBrqrZk49vjTZ");
 
-const getMintInfo = async (connection: Connection, pubKey: PublicKey): Promise<MintInfo> => {
+const getMintInfo = async (
+  connection: Connection,
+  pubKey: PublicKey
+): Promise<MintInfo> => {
   if (pubKey.equals(SOL_MINT)) {
     return {
       mintAuthority: null,
@@ -25,7 +34,7 @@ const getMintInfo = async (connection: Connection, pubKey: PublicKey): Promise<M
       decimals: 9,
       isInitialized: true,
       freezeAuthority: null,
-    }
+    };
   }
 
   const info = await connection.getAccountInfo(pubKey);
@@ -131,10 +140,10 @@ export const cache = {
   },
   add: (
     id: PublicKey | string,
-    obj: AccountInfo<Buffer>,
+    obj: AccountInfo<Buffer | ParsedAccountData>,
     parser?: AccountParser
   ) => {
-    if (obj.data.length === 0) {
+    if (!isAccountInfoBuffer(obj) || obj.data.length === 0) {
       return;
     }
 
@@ -262,7 +271,13 @@ export const cache = {
     const key = pubKey instanceof PublicKey ? pubKey.toBase58() : pubKey;
     return mintCache.has(key);
   },
-  addMint: (pubKey: PublicKey, obj: AccountInfo<Buffer>) => {
+  addMint: (
+    pubKey: PublicKey,
+    obj: AccountInfo<Buffer | ParsedAccountData>
+  ) => {
+    if (!isAccountInfoBuffer(obj)) {
+      return undefined;
+    }
     const mint = deserializeMint(obj.data);
     const id = pubKey.toBase58();
     pendingMintCalls.delete(id);
