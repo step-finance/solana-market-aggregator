@@ -107,7 +107,10 @@ export class MarketAggregator {
       markets = { ...markets, ...sourceDataMap };
     }
 
-    const mintInfo = await getMintInfoMap(this.connection, this.tokenMap);
+    const mintInfo = await getMintInfoMap(
+      this.connection,
+      Object.keys(this.tokenMap)
+    );
 
     return { markets, mintInfo };
   }
