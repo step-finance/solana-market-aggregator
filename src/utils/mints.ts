@@ -1,6 +1,6 @@
 import { Connection } from "@solana/web3.js";
 import { deserializeMint } from "@saberhq/token-utils";
-import { TokenMap, MintInfoMap } from "../types";
+import { MintInfoMap } from "../types";
 import { getMultipleAccounts, isAccountInfoBuffer } from "./web3";
 
 export type RawMintInfo = {
@@ -13,11 +13,11 @@ export type RawMintInfo = {
 
 export const getMintInfoMap = async (
   connection: Connection,
-  tokenMap: TokenMap
+  tokenAddresses: string[]
 ): Promise<MintInfoMap> => {
   const { keys, array } = await getMultipleAccounts(
     connection,
-    Array.from(Object.keys(tokenMap)),
+    tokenAddresses,
     "confirmed"
   );
   return array.reduce<MintInfoMap>((map, tokenAccount, index) => {
