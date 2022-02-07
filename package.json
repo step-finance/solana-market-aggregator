@@ -54,12 +54,12 @@
   "dependencies": {
     "@project-serum/anchor": "^0.20.1",
     "@project-serum/serum": "^0.13.61",
-    "@saberhq/token-utils": "^1.12.32",
+    "@saberhq/token-utils": "^1.12.37",
     "@solana/spl-token": "^0.1.8",
-    "@solana/spl-token-registry": "^0.2.1676",
-    "@solana/web3.js": "^1.32.0",
-    "@stepfinance/step-swap": "^1.1.0",
-    "axios": "^0.24.0",
+    "@solana/spl-token-registry": "^0.2.2086",
+    "@solana/web3.js": "^1.33.0",
+    "@stepfinance/step-swap": "^1.1.1",
+    "axios": "^0.25.0",
     "bn.js": "^5.2.0",
     "jsbi": "^4.1.0"
   }
