@@ -5,7 +5,6 @@ import { CoinGeckoMarketSource } from "../src/sources/coingecko";
 import { MarketDataMap, TokenMap } from "../src/types";
 
 const WRAPPED_SOL_ADDRESS = "So11111111111111111111111111111111111111112";
-const UST_ADDRESS = "UST98bfV6EASdTFQrRwCBczpehdMFwYCUdLT5tEbhpW";
 
 const TEST_TOKEN_MAP: TokenMap = {
   [WRAPPED_SOL_ADDRESS]: {
@@ -105,13 +104,4 @@ describe("CoinGecko Source", () => {
     expect(wrappedSOLMarketData.price).to.be.a("number");
     expect(wrappedSOLMarketData.metadata).to.be.undefined;
   });
-
-  /*it("Overrides TerraUSD coins with malformed CoinGecko ID", () => {
-    const wrappedUSTMarketData = prices[UST_ADDRESS]!;
-    expect(wrappedUSTMarketData.source).to.equal("coingecko");
-    expect(wrappedUSTMarketData.address).to.equal(UST_ADDRESS);
-    expect(wrappedUSTMarketData.symbol).to.equal("swtUST-9");
-    expect(wrappedUSTMarketData.price).to.be.a("number");
-    expect(wrappedUSTMarketData.metadata).to.be.undefined;
-  });*/
 });
