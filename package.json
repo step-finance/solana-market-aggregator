@@ -61,7 +61,6 @@
     "@stepfinance/step-swap": "^1.1.0",
     "axios": "^0.24.0",
     "bn.js": "^5.2.0",
-    "buffer-layout": "^1.2.2",
     "jsbi": "^4.1.0"
   }
 }
