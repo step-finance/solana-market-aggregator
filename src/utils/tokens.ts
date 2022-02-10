@@ -76,9 +76,9 @@ export const getTokenMap = async (
     const { address } = tokenInfo;
     try {
       new PublicKey(address);
-      const ti = tokenMap[address];
-      // Don't override if coingeckoId already exists
-      if (ti && ti.extensions?.coingeckoId === undefined) {
+      const existingTokenInfo = tokenMap[address];
+      // Don't override if existing token info with coingeckoId already exists
+      if (existingTokenInfo === undefined || existingTokenInfo.extensions?.coingeckoId === undefined) {
         tokenMap[address] = tokenInfo;
       }
     } catch (e) {
