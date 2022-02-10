@@ -20,6 +20,7 @@ import {
   TokenInfoWithCoingeckoId,
   tokenInfoHasCoingeckoId,
 } from "../types";
+import { getSaberTokenInfos } from ".";
 
 // shorten the checksummed version of the input address to have 4 characters at start and end
 export function shortenAddress(address: string, chars = 4): string {
@@ -70,25 +71,17 @@ export const getTokenMap = async (
     }
   }
 
-  const rawSaberTokenList = (
-    await axios.get<{ tokens: TokenInfo[] }>(
-      "https://registry.saber.so/data/token-list.mainnet.json"
-    )
-  ).data.tokens;
-  const saberTokenList = new TokenListContainer(rawSaberTokenList);
-  const saberTokenInfos = saberTokenList
-    .filterByClusterSlug(cluster)
-    .excludeByTag("saber-stableswap-lp")
-    .excludeByTag("saber-hidden")
-    .getList();
-
+  const saberTokenInfos = await getSaberTokenInfos(cluster);
   for (const tokenInfo of saberTokenInfos) {
     const { address } = tokenInfo;
     try {
       new PublicKey(address);
-      const ti = tokenMap[address];
-      // Don't override if coingeckoId already exists
-      if (ti && ti.extensions?.coingeckoId === undefined) {
+      const existingTokenInfo = tokenMap[address];
+      // Don't override if existing token info with coingeckoId already exists
+      if (
+        existingTokenInfo === undefined ||
+        existingTokenInfo.extensions?.coingeckoId === undefined
+      ) {
         tokenMap[address] = tokenInfo;
       }
     } catch (e) {
