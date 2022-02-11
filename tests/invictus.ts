@@ -4,6 +4,7 @@ import "mocha";
 
 import {
   INVICTUS_MINT,
+  LOCKED_STAKED_INVICTUS_MINT,
   StakedInvictusMarketSource,
   STAKED_INVICTUS_MINT,
 } from "../src/sources/invictus";
@@ -31,15 +32,27 @@ describe("Staked Invictus source", () => {
     const InvictusSource = new StakedInvictusMarketSource(
       new Connection(process.env.MAINNET_ENDPOINT!)
     );
-    const staticStakedInvictusData = (
-      await InvictusSource.query(staticInvictusMarketData)
-    )[STAKED_INVICTUS_MINT]!;
-    const stakedInvictusMarketData = (
-      await InvictusSource.query(mockedInvictusMarketData)
-    )[STAKED_INVICTUS_MINT]!;
+    const staticInvictusDataMap = await InvictusSource.query(
+      staticInvictusMarketData
+    );
+    const staticStakedInvictusData =
+      staticInvictusDataMap[STAKED_INVICTUS_MINT]!;
+    const staticLockedStakedInvictusData =
+      staticInvictusDataMap[LOCKED_STAKED_INVICTUS_MINT]!;
+
+    const invictusDataMap = await InvictusSource.query(
+      mockedInvictusMarketData
+    );
+    const stakedInvictusMarketData = invictusDataMap[STAKED_INVICTUS_MINT]!;
+    const lockedStakedInvictusMarketData =
+      invictusDataMap[LOCKED_STAKED_INVICTUS_MINT]!;
     expect(
       staticStakedInvictusData.price *
         mockedInvictusMarketData[INVICTUS_MINT]!.price
     ).to.equal(stakedInvictusMarketData.price);
+    expect(
+      staticLockedStakedInvictusData.price *
+        mockedInvictusMarketData[INVICTUS_MINT]!.price
+    ).to.equal(lockedStakedInvictusMarketData.price);
   });
 });

@@ -11,7 +11,7 @@ export const STAKED_INVICTUS_MINT =
 const STAKED_INVICTUS_VAULT = "5EZiwr4fE1rbxpzQUWQ6N9ppkEridNwbH3dU3xUf7wPZ";
 const LOCKED_STAKED_INVICTUS_VAULT =
   "oybxAeqZ1zqricePm6skfNVtY9uHhACzazoKvcUXKXA";
-const LOCKED_STAKED_INVICTUS_MINT =
+export const LOCKED_STAKED_INVICTUS_MINT =
   "LsinpBtQH68hzHqrvWw4PYbH7wMoAobQAzcvxVHwTLv";
 /**
  * A class that retrieves market price of sIN & lsIN
