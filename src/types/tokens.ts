@@ -7,7 +7,7 @@ export type TokenMap = {
 export type MinimalTokenInfo = Omit<TokenInfo, "extensions"> & {
   readonly extensions?: Pick<
     TokenExtensions,
-    "coingeckoId" | "website" | "serumV3Usdc" | "serumV3Usdt"
+    "coingeckoId" | "website" | "twitter" | "description"
   >;
 };
 
