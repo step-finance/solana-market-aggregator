@@ -5,7 +5,7 @@ import { getStarAtlasData } from "../src/utils/star-atlas";
 
 describe("Star Atlas", () => {
   it("Handles multiple markets", async () => {
-    const { markets } = await getStarAtlasData("mainnet-beta");
+    const { markets } = await getStarAtlasData();
     expect(markets).to.deep.include({
       address: "MTc1macY8G2v1MubFxDp4W8cooaSBUZvc2KqaCNwhQE",
       baseMintAddress: "2iMhgB4pbdKvwJHVyitpvX5z1NBNypFonUgaSAt9dtDt",

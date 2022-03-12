@@ -1,5 +1,5 @@
 import { Cluster } from "@solana/web3.js";
-import { TokenInfo, TokenListContainer } from "@solana/spl-token-registry";
+import { CLUSTER_SLUGS, TokenInfo } from "@solana/spl-token-registry";
 import { formatNetwork, Network } from "@saberhq/solana-contrib";
 import axios from "axios";
 
@@ -19,12 +19,13 @@ export const getSaberTokenInfos = async (
         `https://registry.saber.so/data/token-list.${formattedNetwork}.json`
       )
     ).data.tokens;
-    const saberTokenList = new TokenListContainer(rawSaberTokenList);
-    return saberTokenList
-      .filterByClusterSlug(cluster)
-      .excludeByTag("saber-stableswap-lp")
-      .excludeByTag("saber-hidden")
-      .getList();
+
+    return rawSaberTokenList.filter(
+      (t) =>
+        t.chainId === CLUSTER_SLUGS[cluster] &&
+        !t.tags?.includes("saber-stableswap-lp") &&
+        !t.tags?.includes("saber-hidden")
+    );
   }
 
   return [];

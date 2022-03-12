@@ -5,7 +5,7 @@ import {
   StakedInvictusMarketSource,
   MarketSource,
 } from "./sources";
-import {
+import type {
   ISerumMarketInfo,
   MarketDataMap,
   MarketSourcesData,
@@ -51,19 +51,19 @@ export class MarketAggregator {
     try {
       const tokenMap = await getTokenMap(this.connection, this.cluster);
       const { tokenMap: starAtlasTokenMap, markets: starAtlasSerumMarkets } =
-        await getStarAtlasData(this.cluster);
+        await getStarAtlasData();
 
       const serumMarketInfoMap = await getSerumMarketInfoMap();
       this.tokenMap = { ...starAtlasTokenMap, ...tokenMap };
-      this.serumTokenMap = Object.values(this.tokenMap).reduce(
-        (map, tokenInfo) => {
-          if (!tokenInfo.extensions?.coingeckoId) {
-            map[tokenInfo.address] = tokenInfo;
-          }
-          return map;
-        },
-        {}
-      );
+
+      const serumTokenMap: TokenMap = {};
+      const tokenInfos = Object.values(this.tokenMap);
+      for (const tokenInfo of tokenInfos) {
+        if (!tokenInfo.extensions?.coingeckoId) {
+          serumTokenMap[tokenInfo.address] = tokenInfo;
+        }
+      }
+      this.serumTokenMap = serumTokenMap;
       this.serumMarkets = [...starAtlasSerumMarkets, ...serumMarketInfoMap];
     } catch (err) {
       console.log(err);

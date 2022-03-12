@@ -1,5 +1,5 @@
 import { MarketSource } from "./marketsource";
-import { MarketDataMap } from "../types/marketdata";
+import type { MarketDataMap } from "../types/marketdata";
 
 export const SRM_MINT = "SRMuApVNdxXokk5GT7XD5cUUgXMBCoAz2LHeuAoKWRt";
 export const MSRM_MINT = "MSRMcoVyrFxnSgo5uXwone5SKcGhT1KEJMFEkMEWf9L";

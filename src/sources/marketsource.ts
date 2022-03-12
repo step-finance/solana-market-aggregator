@@ -1,4 +1,4 @@
-import { MarketDataMap } from "../types/marketdata";
+import type { MarketDataMap } from "../types/marketdata";
 
 export interface MarketSource {
   // eslint-disable-next-line no-unused-vars
