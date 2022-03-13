@@ -1,7 +1,7 @@
 import { Connection } from "@solana/web3.js";
 import { expect } from "chai";
 import "mocha";
-import { MarketDataMap } from "../src";
+import type { MarketDataMap } from "../src";
 
 import {
   StakedStepMarketSource,

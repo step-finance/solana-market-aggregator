@@ -1,9 +1,9 @@
-import {
+import { PublicKey } from "@solana/web3.js";
+import type {
   AccountInfo,
   Commitment,
   Connection,
   ParsedAccountData,
-  PublicKey,
 } from "@solana/web3.js";
 import { Buffer } from "buffer";
 

@@ -3,7 +3,7 @@ import { BN, Idl, Program, Provider, web3 } from "@project-serum/anchor";
 import type { Wallet } from "@project-serum/anchor/dist/cjs/provider";
 
 import { MarketSource } from "./marketsource";
-import { MarketDataMap } from "../types/marketdata";
+import type { MarketDataMap } from "../types/marketdata";
 import XSTEP_IDL from "../models/idl/step_staking.json";
 
 const XSTEP_PROGRAM_ID = "Stk5NCWomVN3itaFjLu382u9ibb5jMSHEsh6CuhaGjB";

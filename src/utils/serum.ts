@@ -1,5 +1,5 @@
 import axios from "axios";
-import { ISerumMarketInfo } from "../types/serum";
+import type { ISerumMarketInfo } from "../types/serum";
 
 export const SERUM_MARKET_LIST_URL =
   "https://raw.githubusercontent.com/step-finance/serum-markets/main/src/markets.json" as const;

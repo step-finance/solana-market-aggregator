@@ -1,6 +1,6 @@
 import { Connection } from "@solana/web3.js";
 import { deserializeMint } from "@saberhq/token-utils";
-import { MintInfoMap } from "../types";
+import type { MintInfoMap } from "../types";
 import { getMultipleAccounts, isAccountInfoBuffer } from "./web3";
 
 export type RawMintInfo = {
@@ -20,10 +20,14 @@ export const getMintInfoMap = async (
     tokenAddresses,
     "confirmed"
   );
-  return array.reduce<MintInfoMap>((map, tokenAccount, index) => {
+
+  const mintInfoMap: MintInfoMap = {};
+
+  for (let index = 0; index < array.length; index++) {
     const address = keys[index];
-    if (!address || !isAccountInfoBuffer(tokenAccount)) {
-      return map;
+    const tokenAccount = array[index];
+    if (!address || !tokenAccount || !isAccountInfoBuffer(tokenAccount)) {
+      continue;
     }
 
     try {
@@ -34,22 +38,21 @@ export const getMintInfoMap = async (
         mintAuthority,
         supply,
       } = deserializeMint(tokenAccount.data);
-      return {
-        ...map,
-        [address]: {
-          mintAuthority: mintAuthority?.toBase58() ?? null,
-          supply: supply.toString(),
-          decimals,
-          isInitialized,
-          freezeAuthority: freezeAuthority?.toBase58() ?? null,
-        },
+
+      mintInfoMap[address] = {
+        mintAuthority: mintAuthority?.toBase58() ?? null,
+        supply: supply.toString(),
+        decimals,
+        isInitialized,
+        freezeAuthority: freezeAuthority?.toBase58() ?? null,
       };
     } catch (e) {
-      // Skip mints we cannot parse
-      if ((e as Error).message === "Not a valid Mint") {
-        return map;
+      // Ignore mints we cannot parse
+      if ((e as Error).message !== "Not a valid Mint") {
+        console.log(e);
       }
-      throw e;
     }
-  }, {});
+  }
+
+  return mintInfoMap;
 };

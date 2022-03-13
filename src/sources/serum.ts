@@ -1,10 +1,10 @@
 import { Connection, PublicKey } from "@solana/web3.js";
-import { TokenInfo } from "@solana/spl-token-registry";
+import type { TokenInfo } from "@solana/spl-token-registry";
 import { Market, Orderbook } from "@project-serum/serum";
 
 import { MarketSource } from "./marketsource";
-import { MarketDataMap } from "../types/marketdata";
-import { ISerumMarketInfo, TokenMap } from "../types";
+import type { MarketDataMap } from "../types/marketdata";
+import type { ISerumMarketInfo, TokenMap } from "../types";
 import { getMultipleAccounts } from "../utils/web3";
 import { DexMarketParser } from "../utils/parsers";
 import { cache } from "../utils/cache";
@@ -76,20 +76,28 @@ export class SerumMarketSource implements MarketSource {
       this.marketKeys.filter((a) => cache.get(a) === undefined),
       "single"
     );
-    array.forEach((item, index) => {
+
+    for (let index = 0; index < array.length; index++) {
       const marketAddress = keys[index];
-      if (marketAddress) {
+      const item = array[index];
+      if (marketAddress && item) {
         cache.add(marketAddress, item, DexMarketParser);
       }
-    });
+    }
 
     await this.updatePrices();
 
     const marketDataMap: MarketDataMap = {};
-    this.markets.forEach(({ address: marketAddress, baseMintAddress }) => {
-      const { price, marketPrices, quoteMintAddress } =
-        this.getMarketPrices(marketAddress);
-      const tokenInfo = this.tokenMap[baseMintAddress];
+    for (let index = 0; index < this.markets.length; index++) {
+      const market = this.markets[index];
+      if (!market) {
+        continue;
+      }
+
+      const { price, marketPrices, quoteMintAddress } = this.getMarketPrices(
+        market.address
+      );
+      const tokenInfo = this.tokenMap[market.baseMintAddress];
       const isUSDQuote = USD_MINTS.has(quoteMintAddress);
       if (tokenInfo && isUSDQuote) {
         const { address, symbol } = tokenInfo;
@@ -103,7 +111,7 @@ export class SerumMarketSource implements MarketSource {
           },
         };
       }
-    });
+    }
 
     return marketDataMap;
   }
@@ -111,7 +119,9 @@ export class SerumMarketSource implements MarketSource {
   private updatePrices = async () => {
     const accountsToQuery = new Set<string>();
     const mintsToQuery = new Set<string>();
-    this.marketKeys.forEach((m) => {
+
+    for (let index = 0; index < this.marketKeys.length; index++) {
+      const m = this.marketKeys[index]!;
       const market = cache.get(m);
       if (!market) {
         return;
@@ -129,7 +139,7 @@ export class SerumMarketSource implements MarketSource {
 
       accountsToQuery.add(decoded.info.bids.toBase58());
       accountsToQuery.add(decoded.info.asks.toBase58());
-    });
+    }
 
     const allKeys = [...accountsToQuery.keys(), ...mintsToQuery.keys()];
 

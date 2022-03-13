@@ -1,11 +1,6 @@
 import { Cluster, Connection, PublicKey } from "@solana/web3.js";
-import {
-  ENV,
-  Strategy,
-  TokenInfo,
-  TokenListContainer,
-  TokenListProvider,
-} from "@solana/spl-token-registry";
+import { CLUSTER_SLUGS, ENV } from "@solana/spl-token-registry";
+import type { TokenInfo, TokenList } from "@solana/spl-token-registry";
 import { deserializeMint } from "@saberhq/token-utils";
 import {
   STEP_SWAP_OWNER,
@@ -31,37 +26,37 @@ export const getTokenMap = async (
   connection: Connection,
   cluster: Cluster
 ): Promise<TokenMap> => {
-  const baseTokenListProvider = new TokenListProvider();
-  const baseTokenList = await baseTokenListProvider.resolve(Strategy.GitHub);
-  const baseTokenInfos = baseTokenList
-    .filterByClusterSlug(cluster)
-    .excludeByTag("lp-token")
-    .excludeByTag("tokenized-stock")
-    .getList();
-
-  const tokenMap: TokenMap = baseTokenInfos.reduce<TokenMap>(
-    (map, tokenInfo) => {
-      try {
-        new PublicKey(tokenInfo.address);
-        return { ...map, [tokenInfo.address]: tokenInfo };
-      } catch (e) {
-        return map;
-      }
-    },
-    {}
+  const { data: solanaTokenList } = await axios.get<TokenList>(
+    "https://raw.githubusercontent.com/solana-labs/token-list/main/src/tokens/solana.tokenlist.json"
   );
+
+  const tokenMap: TokenMap = {};
+
+  for (const tokenInfo of solanaTokenList.tokens) {
+    if (
+      tokenInfo.chainId !== CLUSTER_SLUGS[cluster] ||
+      tokenInfo.tags?.includes("lp-token") ||
+      tokenInfo.tags?.includes("tokenized-stock")
+    ) {
+      continue;
+    }
+    const { address } = tokenInfo;
+    try {
+      new PublicKey(address);
+      tokenMap[address] = tokenInfo;
+    } catch (e) {
+      console.error(e);
+    }
+  }
 
   const { data: rawStepTokenOverridesList } = await axios.get<TokenInfo[]>(
     "https://raw.githubusercontent.com/step-finance/token-list-overrides/main/src/token-list.json"
   );
-  const stepTokenOverridesList = new TokenListContainer(
-    rawStepTokenOverridesList
-  );
-  const stepTokenOverridesTokenInfos = stepTokenOverridesList
-    .filterByClusterSlug(cluster)
-    .getList();
 
-  for (const tokenInfo of stepTokenOverridesTokenInfos) {
+  for (const tokenInfo of rawStepTokenOverridesList) {
+    if (tokenInfo.chainId !== CLUSTER_SLUGS[cluster]) {
+      continue;
+    }
     const { address } = tokenInfo;
     try {
       new PublicKey(address);

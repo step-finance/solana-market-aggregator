@@ -5,3 +5,20 @@
 </h1>
 
 # Solana Market Aggregator
+
+## Running tests
+
+```bash
+
+yarn test
+
+```
+
+## Publishing a new version
+
+```bash
+yarn version
+git push
+git push --tags
+npm publish
+```
