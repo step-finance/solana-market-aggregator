@@ -1,4 +1,4 @@
-import { TokenExtensions, TokenInfo } from "@solana/spl-token-registry";
+import type { TokenExtensions, TokenInfo } from "@solana/spl-token-registry";
 
 export interface ICoinGeckoCoinMarketData {
   id: string;

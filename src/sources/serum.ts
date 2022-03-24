@@ -2,7 +2,7 @@ import { Connection, PublicKey } from "@solana/web3.js";
 import type { TokenInfo } from "@solana/spl-token-registry";
 import { Market, Orderbook } from "@project-serum/serum";
 
-import { MarketSource } from "./marketsource";
+import type { MarketSource } from "./marketsource";
 import type { MarketDataMap } from "../types/marketdata";
 import type { ISerumMarketInfo, TokenMap } from "../types";
 import { getMultipleAccounts } from "../utils/web3";

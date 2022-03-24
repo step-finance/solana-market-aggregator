@@ -1,6 +1,8 @@
-import { Cluster } from "@solana/web3.js";
-import { CLUSTER_SLUGS, TokenInfo } from "@solana/spl-token-registry";
-import { formatNetwork, Network } from "@saberhq/solana-contrib";
+import type { Cluster } from "@solana/web3.js";
+import type { TokenInfo } from "@solana/spl-token-registry";
+import { CLUSTER_SLUGS } from "@solana/spl-token-registry";
+import type { Network } from "@saberhq/solana-contrib";
+import { formatNetwork } from "@saberhq/solana-contrib";
 import axios from "axios";
 
 export type SaberLiquidityNetwork = "mainnet-beta" | "devnet";

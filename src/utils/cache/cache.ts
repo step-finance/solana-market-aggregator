@@ -7,7 +7,7 @@ import {
   PublicKey,
 } from "@solana/web3.js";
 
-import { MintInfoMap } from "../../types";
+import type { MintInfoMap } from "../../types";
 import { BaseError } from "../errors";
 import {
   AccountParser,
