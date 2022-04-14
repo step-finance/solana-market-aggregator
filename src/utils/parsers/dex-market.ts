@@ -1,7 +1,7 @@
 import { Market } from "@project-serum/serum";
 import { AccountInfo, PublicKey } from "@solana/web3.js";
 import { ParsedAccountBase } from ".";
-import { cache } from "../cache";
+import { AccountCache } from "../cache";
 import { MintParser } from "./mint";
 import { OrderBookParser } from "./orderbook";
 
@@ -11,7 +11,8 @@ export const DEFAULT_DEX_ID = new PublicKey(
 
 export const DexMarketParser = (
   pubkey: PublicKey,
-  acc: AccountInfo<Buffer>
+  acc: AccountInfo<Buffer>,
+  accountCache?: AccountCache
 ) => {
   const decoded = Market.getLayout(DEFAULT_DEX_ID).decode(acc.data);
 
@@ -23,10 +24,10 @@ export const DexMarketParser = (
     info: decoded,
   } as ParsedAccountBase;
 
-  cache.registerParser(details.info.baseMint, MintParser);
-  cache.registerParser(details.info.quoteMint, MintParser);
-  cache.registerParser(details.info.bids, OrderBookParser);
-  cache.registerParser(details.info.asks, OrderBookParser);
+  accountCache?.registerParser(details.info.baseMint, MintParser);
+  accountCache?.registerParser(details.info.quoteMint, MintParser);
+  accountCache?.registerParser(details.info.bids, OrderBookParser);
+  accountCache?.registerParser(details.info.asks, OrderBookParser);
 
   return details;
 };

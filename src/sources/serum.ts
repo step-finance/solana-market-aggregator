@@ -7,7 +7,7 @@ import type { MarketDataMap } from "../types/marketdata";
 import type { ISerumMarketInfo, TokenMap } from "../types";
 import { getMultipleAccounts } from "../utils/web3";
 import { DexMarketParser } from "../utils/parsers";
-import { cache } from "../utils/cache";
+import { AccountCache } from "../utils/cache";
 
 export const SERUM_PROGRAM_ID_V3 =
   "9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin";
@@ -34,6 +34,7 @@ export interface ISerumMarketTokenInfo {
  */
 export class SerumMarketSource implements MarketSource {
   readonly connection: Connection;
+  readonly accountCache: AccountCache;
   readonly tokenMap: TokenMap;
   readonly markets: ISerumMarketInfo[];
   private marketKeys: string[];
@@ -46,10 +47,12 @@ export class SerumMarketSource implements MarketSource {
    */
   constructor(
     connection: Connection,
+    accountCache: AccountCache,
     tokenMap: TokenMap,
     markets: ISerumMarketInfo[]
   ) {
     this.connection = connection;
+    this.accountCache = accountCache;
     this.tokenMap = tokenMap;
     this.markets = markets;
 
@@ -73,7 +76,7 @@ export class SerumMarketSource implements MarketSource {
     const { keys, array } = await getMultipleAccounts(
       this.connection,
       // only query for markets that are not in cache
-      this.marketKeys.filter((a) => cache.get(a) === undefined),
+      this.marketKeys.filter((a) => this.accountCache.get(a) === undefined),
       "single"
     );
 
@@ -81,7 +84,7 @@ export class SerumMarketSource implements MarketSource {
       const marketAddress = keys[index];
       const item = array[index];
       if (marketAddress && item) {
-        cache.add(marketAddress, item, DexMarketParser);
+        this.accountCache.add(marketAddress, item, DexMarketParser);
       }
     }
 
@@ -122,18 +125,18 @@ export class SerumMarketSource implements MarketSource {
 
     for (let index = 0; index < this.marketKeys.length; index++) {
       const m = this.marketKeys[index]!;
-      const market = cache.get(m);
+      const market = this.accountCache.get(m);
       if (!market) {
         return;
       }
 
       const decoded = market;
 
-      if (!cache.getMint(decoded.info.baseMint)) {
+      if (!this.accountCache.getMint(decoded.info.baseMint)) {
         mintsToQuery.add(decoded.info.baseMint.toBase58());
       }
 
-      if (!cache.getMint(decoded.info.quoteMint)) {
+      if (!this.accountCache.getMint(decoded.info.quoteMint)) {
         mintsToQuery.add(decoded.info.quoteMint.toBase58());
       }
 
@@ -149,9 +152,9 @@ export class SerumMarketSource implements MarketSource {
           .map((item, index) => {
             const address = keys[index];
             if (address && accountsToQuery.has(address)) {
-              return cache.add(new PublicKey(address), item);
+              return this.accountCache.add(new PublicKey(address), item);
             } else if (address && mintsToQuery.has(address)) {
-              return cache.addMint(new PublicKey(address), item);
+              return this.accountCache.addMint(new PublicKey(address), item);
             } else {
               return undefined;
             }
@@ -170,7 +173,7 @@ export class SerumMarketSource implements MarketSource {
   } => {
     let [bid, ask, mid] = [-1, -1, 0.0];
 
-    const marketAccount = cache.get(marketAddress);
+    const marketAccount = this.accountCache.get(marketAddress);
     if (!marketAccount) {
       return {
         quoteMintAddress: "",
@@ -186,9 +189,9 @@ export class SerumMarketSource implements MarketSource {
     const decodedMarket = marketAccount.info;
 
     const baseMintDecimals =
-      cache.getMint(decodedMarket.baseMint)?.decimals || 0;
+      this.accountCache.getMint(decodedMarket.baseMint)?.decimals || 0;
     const quoteMintDecimals =
-      cache.getMint(decodedMarket.quoteMint)?.decimals || 0;
+      this.accountCache.getMint(decodedMarket.quoteMint)?.decimals || 0;
 
     const market = new Market(
       decodedMarket,
@@ -198,8 +201,8 @@ export class SerumMarketSource implements MarketSource {
       decodedMarket.programId
     );
 
-    const bids = cache.get(decodedMarket.bids)?.info;
-    const asks = cache.get(decodedMarket.asks)?.info;
+    const bids = this.accountCache.get(decodedMarket.bids)?.info;
+    const asks = this.accountCache.get(decodedMarket.asks)?.info;
 
     let price = mid;
     if (bids) {

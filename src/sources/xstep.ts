@@ -1,5 +1,5 @@
 import { Connection, ConfirmOptions } from "@solana/web3.js";
-import { BN, Idl, Program, Provider, web3 } from "@project-serum/anchor";
+import { BN, Idl, Program, AnchorProvider, web3 } from "@project-serum/anchor";
 import type { Wallet } from "@project-serum/anchor/dist/cjs/provider";
 
 import { MarketSource } from "./marketsource";
@@ -22,7 +22,7 @@ type XStepPriceEvent = {
  */
 export class StakedStepMarketSource implements MarketSource {
   readonly connection: Connection;
-  readonly provider: Provider;
+  readonly provider: AnchorProvider;
   readonly program: Program;
 
   /**
@@ -44,7 +44,11 @@ export class StakedStepMarketSource implements MarketSource {
       publicKey: new web3.PublicKey(STEP_DEPLOYER),
     };
 
-    this.provider = new Provider(this.connection, wallet, CONFIRM_OPTIONS);
+    this.provider = new AnchorProvider(
+      this.connection,
+      wallet,
+      CONFIRM_OPTIONS
+    );
     this.program = new Program(
       XSTEP_IDL as Idl,
       XSTEP_PROGRAM_ID,
