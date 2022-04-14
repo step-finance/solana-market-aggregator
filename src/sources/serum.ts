@@ -1,16 +1,16 @@
-import { Connection, PublicKey } from "@solana/web3.js";
-import type { TokenInfo } from "@solana/spl-token-registry";
 import { Market, Orderbook } from "@project-serum/serum";
+import type { TokenInfo } from "@solana/spl-token-registry";
+import type { Connection } from "@solana/web3.js";
+import { PublicKey } from "@solana/web3.js";
 
-import type { MarketSource } from "./marketsource";
-import type { MarketDataMap } from "../types/marketdata";
 import type { ISerumMarketInfo, TokenMap } from "../types";
-import { getMultipleAccounts } from "../utils/web3";
+import type { MarketDataMap } from "../types/marketdata";
+import type { AccountCache } from "../utils/cache";
 import { DexMarketParser } from "../utils/parsers";
-import { AccountCache } from "../utils/cache";
+import { getMultipleAccounts } from "../utils/web3";
+import type { MarketSource } from "./marketsource";
 
-export const SERUM_PROGRAM_ID_V3 =
-  "9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin";
+export const SERUM_PROGRAM_ID_V3 = "9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin";
 
 export const USD_MINTS = new Set([
   "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", // USDC
@@ -45,26 +45,18 @@ export class SerumMarketSource implements MarketSource {
    * @param tokens List of tokens to find prices for
    * @param markets List of available markets to match tokens against
    */
-  constructor(
-    connection: Connection,
-    accountCache: AccountCache,
-    tokenMap: TokenMap,
-    markets: ISerumMarketInfo[]
-  ) {
+  constructor(connection: Connection, accountCache: AccountCache, tokenMap: TokenMap, markets: ISerumMarketInfo[]) {
     this.connection = connection;
     this.accountCache = accountCache;
     this.tokenMap = tokenMap;
     this.markets = markets;
 
-    this.marketKeys = this.markets.reduce<string[]>(
-      (keys, { address, baseMintAddress, deprecated }) => {
-        if (!deprecated && this.tokenMap[baseMintAddress]) {
-          keys.push(address);
-        }
-        return keys;
-      },
-      []
-    );
+    this.marketKeys = this.markets.reduce<string[]>((keys, { address, baseMintAddress, deprecated }) => {
+      if (!deprecated && this.tokenMap[baseMintAddress]) {
+        keys.push(address);
+      }
+      return keys;
+    }, []);
   }
 
   /**
@@ -77,7 +69,7 @@ export class SerumMarketSource implements MarketSource {
       this.connection,
       // only query for markets that are not in cache
       this.marketKeys.filter((a) => this.accountCache.get(a) === undefined),
-      "single"
+      "single",
     );
 
     for (let index = 0; index < array.length; index++) {
@@ -97,9 +89,7 @@ export class SerumMarketSource implements MarketSource {
         continue;
       }
 
-      const { price, marketPrices, quoteMintAddress } = this.getMarketPrices(
-        market.address
-      );
+      const { price, marketPrices, quoteMintAddress } = this.getMarketPrices(market.address);
       const tokenInfo = this.tokenMap[market.baseMintAddress];
       const isUSDQuote = USD_MINTS.has(quoteMintAddress);
       if (tokenInfo && isUSDQuote) {
@@ -146,26 +136,24 @@ export class SerumMarketSource implements MarketSource {
 
     const allKeys = [...accountsToQuery.keys(), ...mintsToQuery.keys()];
 
-    await getMultipleAccounts(this.connection, allKeys, "single").then(
-      ({ keys, array }) => {
-        return array
-          .map((item, index) => {
-            const address = keys[index];
-            if (address && accountsToQuery.has(address)) {
-              return this.accountCache.add(new PublicKey(address), item);
-            } else if (address && mintsToQuery.has(address)) {
-              return this.accountCache.addMint(new PublicKey(address), item);
-            } else {
-              return undefined;
-            }
-          })
-          .filter((a) => !!a);
-      }
-    );
+    await getMultipleAccounts(this.connection, allKeys, "single").then(({ keys, array }) => {
+      return array
+        .map((item, index) => {
+          const address = keys[index];
+          if (address && accountsToQuery.has(address)) {
+            return this.accountCache.add(new PublicKey(address), item);
+          } else if (address && mintsToQuery.has(address)) {
+            return this.accountCache.addMint(new PublicKey(address), item);
+          } else {
+            return undefined;
+          }
+        })
+        .filter((a) => !!a);
+    });
   };
 
   private getMarketPrices = (
-    marketAddress: string
+    marketAddress: string,
   ): {
     price: number;
     marketPrices: MarketPrices;
@@ -188,18 +176,10 @@ export class SerumMarketSource implements MarketSource {
 
     const decodedMarket = marketAccount.info;
 
-    const baseMintDecimals =
-      this.accountCache.getMint(decodedMarket.baseMint)?.decimals || 0;
-    const quoteMintDecimals =
-      this.accountCache.getMint(decodedMarket.quoteMint)?.decimals || 0;
+    const baseMintDecimals = this.accountCache.getMint(decodedMarket.baseMint)?.decimals || 0;
+    const quoteMintDecimals = this.accountCache.getMint(decodedMarket.quoteMint)?.decimals || 0;
 
-    const market = new Market(
-      decodedMarket,
-      baseMintDecimals,
-      quoteMintDecimals,
-      undefined,
-      decodedMarket.programId
-    );
+    const market = new Market(decodedMarket, baseMintDecimals, quoteMintDecimals, undefined, decodedMarket.programId);
 
     const bids = this.accountCache.get(decodedMarket.bids)?.info;
     const asks = this.accountCache.get(decodedMarket.asks)?.info;

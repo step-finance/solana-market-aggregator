@@ -38,8 +38,7 @@ export type TokenInfoWithCoingeckoId = Omit<TokenInfo, "extensions"> & {
     readonly coingeckoId: string;
   };
 };
-export const tokenInfoHasCoingeckoId = (
-  tokenInfo: TokenInfo
-): tokenInfo is TokenInfoWithCoingeckoId => !!tokenInfo.extensions?.coingeckoId;
+export const tokenInfoHasCoingeckoId = (tokenInfo: TokenInfo): tokenInfo is TokenInfoWithCoingeckoId =>
+  !!tokenInfo.extensions?.coingeckoId;
 
 export type CoingeckoTokenMap = { [address: string]: TokenInfoWithCoingeckoId };

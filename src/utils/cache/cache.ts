@@ -1,26 +1,19 @@
 import { deserializeMint } from "@saberhq/token-utils";
-import { MintInfo, u64 } from "@solana/spl-token";
-import {
-  AccountInfo,
-  Connection,
-  ParsedAccountData,
-  PublicKey,
-} from "@solana/web3.js";
+import type { MintInfo } from "@solana/spl-token";
+import { u64 } from "@solana/spl-token";
+import type { AccountInfo, Connection, ParsedAccountData } from "@solana/web3.js";
+import { PublicKey } from "@solana/web3.js";
 
 import type { MintInfoMap } from "../../types";
 import { BaseError } from "../errors";
-import { AccountParser, ParsedAccountBase, TokenAccount } from "../parsers";
+import type { AccountParser, ParsedAccountBase, TokenAccount } from "../parsers";
 import { isAccountInfoBuffer } from "../web3";
-
 import { EventEmitter } from "./emitter";
 
 // Arbitrary mint to represent SOL (not wrapped SOL).
 const SOL_MINT = new PublicKey("Ejmc1UB4EsES5oAaRN63SpoxMJidt3ZGBrqrZk49vjTZ");
 
-const getMintInfo = async (
-  connection: Connection,
-  pubKey: PublicKey
-): Promise<MintInfo> => {
+const getMintInfo = async (connection: Connection, pubKey: PublicKey): Promise<MintInfo> => {
   if (pubKey.equals(SOL_MINT)) {
     return {
       mintAuthority: null,
@@ -70,7 +63,7 @@ export class AccountCache {
 
     const address = id.toBase58();
 
-    let account = this.genericCache.get(address);
+    const account = this.genericCache.get(address);
     if (account) {
       return account;
     }
@@ -82,9 +75,7 @@ export class AccountCache {
 
     query = this.connection.getAccountInfo(id).then((data) => {
       if (!data) {
-        throw new AccountNotFoundError(
-          `Account not found with address ID ${id.toBase58()}`
-        );
+        throw new AccountNotFoundError(`Account not found with address ID ${id.toBase58()}`);
       }
       return this.add(id, data, parser);
     }) as Promise<TokenAccount>;
@@ -93,11 +84,7 @@ export class AccountCache {
     return query;
   }
 
-  add(
-    id: PublicKey | string,
-    obj: AccountInfo<Buffer | ParsedAccountData>,
-    parser?: AccountParser
-  ) {
+  add(id: PublicKey | string, obj: AccountInfo<Buffer | ParsedAccountData>, parser?: AccountParser) {
     if (!isAccountInfoBuffer(obj) || obj.data.length === 0) {
       return;
     }
@@ -105,9 +92,7 @@ export class AccountCache {
     const address = typeof id === "string" ? id : id?.toBase58();
     const deserialize = parser ? parser : this.keyToAccountParser.get(address);
     if (!deserialize) {
-      throw new Error(
-        "Deserializer needs to be registered or passed as a parameter"
-      );
+      throw new Error("Deserializer needs to be registered or passed as a parameter");
     }
 
     this.registerParser(id, deserialize);
@@ -188,7 +173,7 @@ export class AccountCache {
     }
 
     const address = id.toBase58();
-    let mint = this.mintCache.get(address);
+    const mint = this.mintCache.get(address);
     if (mint) {
       return mint;
     }
@@ -253,9 +238,7 @@ export class AccountCache {
       const { freezeAuthority, mintAuthority, supply } = rawMintInfo;
       const mintInfo: MintInfo = {
         ...rawMintInfo,
-        freezeAuthority: freezeAuthority
-          ? new PublicKey(freezeAuthority)
-          : null,
+        freezeAuthority: freezeAuthority ? new PublicKey(freezeAuthority) : null,
         mintAuthority: mintAuthority ? new PublicKey(mintAuthority) : null,
         supply: new u64(supply),
       };

@@ -1,9 +1,5 @@
-import {
-  AccountInfo,
-  ConfirmedSignatureInfo,
-  ConfirmedTransaction,
-  PublicKey,
-} from "@solana/web3.js";
+import type { AccountInfo, ConfirmedSignatureInfo, ConfirmedTransaction, PublicKey } from "@solana/web3.js";
+
 import type { AccountCache } from "../cache";
 
 export interface ParsedAccountBase {
@@ -28,5 +24,5 @@ export type AccountParser = (
   // eslint-disable-next-line no-unused-vars
   data: AccountInfo<Buffer>,
   // eslint-disable-next-line no-unused-vars
-  accountCache?: AccountCache
+  accountCache?: AccountCache,
 ) => ParsedAccountBase | undefined;
