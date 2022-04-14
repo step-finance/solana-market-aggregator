@@ -4,6 +4,7 @@ import {
   ConfirmedTransaction,
   PublicKey,
 } from "@solana/web3.js";
+import type { AccountCache } from "../cache";
 
 export interface ParsedAccountBase {
   pubkey: PublicKey;
@@ -25,5 +26,7 @@ export type AccountParser = (
   // eslint-disable-next-line no-unused-vars
   pubkey: PublicKey,
   // eslint-disable-next-line no-unused-vars
-  data: AccountInfo<Buffer>
+  data: AccountInfo<Buffer>,
+  // eslint-disable-next-line no-unused-vars
+  accountCache?: AccountCache
 ) => ParsedAccountBase | undefined;

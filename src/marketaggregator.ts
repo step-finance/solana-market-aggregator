@@ -17,6 +17,7 @@ import { getSerumMarketInfoMap } from "./utils/serum";
 import { getStarAtlasData } from "./utils/star-atlas";
 import { Cluster, Connection, ConnectionConfig } from "@solana/web3.js";
 import { MSRMMarketSource } from "./sources/msrm";
+import { AccountCache } from "./utils";
 
 export type MarketAggregatorConnectionConfig = ConnectionConfig & {
   endpoint: string;
@@ -34,10 +35,12 @@ export class MarketAggregator {
   stakedSources: MarketSource[] = [];
   // Map of tokens without CoinGecko IDs
   private serumTokenMap: TokenMap = {};
+  private accountCache: AccountCache;
 
   constructor(config: MarketAggregatorConnectionConfig) {
     const { endpoint, cluster, ...web3ConnectionConfig } = config;
     this.connection = new Connection(endpoint, web3ConnectionConfig);
+    this.accountCache = new AccountCache(this.connection);
     this.cluster = cluster;
     this.setupStakedSources();
   }
@@ -92,6 +95,7 @@ export class MarketAggregator {
     );
     const serumSource = new SerumMarketSource(
       this.connection,
+      this.accountCache,
       this.serumTokenMap,
       this.serumMarkets
     );

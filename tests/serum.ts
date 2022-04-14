@@ -4,6 +4,7 @@ import { Connection } from "@solana/web3.js";
 
 import { SerumMarketSource } from "../src/sources/serum";
 import { ISerumMarketInfo, TokenMap } from "../src/types";
+import { AccountCache } from "../src";
 
 const testSerumMarkets: ISerumMarketInfo[] = [
   {
@@ -76,8 +77,10 @@ const connection = new Connection(process.env.MAINNET_ENDPOINT!);
 
 describe("Serum Source", () => {
   it("requests market prices", async () => {
+    const accountCache = new AccountCache(connection);
     const serumMarketSource = new SerumMarketSource(
       connection,
+      accountCache,
       testTokenMap,
       testSerumMarkets
     );
@@ -89,8 +92,10 @@ describe("Serum Source", () => {
   });
 
   it("loads market prices data", async () => {
+    const accountCache = new AccountCache(connection);
     const serumMarketSource = new SerumMarketSource(
       connection,
+      accountCache,
       testTokenMap,
       testSerumMarkets
     );
