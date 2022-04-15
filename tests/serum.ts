@@ -1,10 +1,11 @@
 import "mocha";
-import { expect } from "chai";
-import { Connection } from "@solana/web3.js";
 
-import { SerumMarketSource } from "../src/sources/serum";
-import { ISerumMarketInfo, TokenMap } from "../src/types";
+import { Connection } from "@solana/web3.js";
+import { expect } from "chai";
+
 import { AccountCache } from "../src";
+import { SerumMarketSource } from "../src/sources/serum";
+import type { ISerumMarketInfo, TokenMap } from "../src/types";
 
 const testSerumMarkets: ISerumMarketInfo[] = [
   {
@@ -65,8 +66,7 @@ const testTokenMap: TokenMap = {
       "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/9n4nbM75f5Ui33ZbPYXn59EwSgE8CGsHtAeTH5YFeJ9E/logo.png",
     tags: ["wrapped-sollet", "ethereum"],
     extensions: {
-      bridgeContract:
-        "https://etherscan.io/address/0xeae57ce9cc1984f202e15e038b964bb8bdf7229a",
+      bridgeContract: "https://etherscan.io/address/0xeae57ce9cc1984f202e15e038b964bb8bdf7229a",
       serumV3Usdc: "A8YFbxQYFVqKZaoYJLLUVcQiWP7G2MeEgW5wsAQgMvFw",
       serumV3Usdt: "C1EuT9VokAKLiW7i2ASnZUvxDoKuKkCpDDeNxAptuNe4",
       coingeckoId: "bitcoin",
@@ -78,12 +78,7 @@ const connection = new Connection(process.env.MAINNET_ENDPOINT!);
 describe("Serum Source", () => {
   it("requests market prices", async () => {
     const accountCache = new AccountCache(connection);
-    const serumMarketSource = new SerumMarketSource(
-      connection,
-      accountCache,
-      testTokenMap,
-      testSerumMarkets
-    );
+    const serumMarketSource = new SerumMarketSource(connection, accountCache, testTokenMap, testSerumMarkets);
     const marketDataMap = await serumMarketSource.query();
     expect(marketDataMap).to.include.keys([
       "So11111111111111111111111111111111111111112",
@@ -93,20 +88,10 @@ describe("Serum Source", () => {
 
   it("loads market prices data", async () => {
     const accountCache = new AccountCache(connection);
-    const serumMarketSource = new SerumMarketSource(
-      connection,
-      accountCache,
-      testTokenMap,
-      testSerumMarkets
-    );
+    const serumMarketSource = new SerumMarketSource(connection, accountCache, testTokenMap, testSerumMarkets);
     const serumSources = await serumMarketSource.query();
-    const serumSource =
-      serumSources["So11111111111111111111111111111111111111112"]!;
+    const serumSource = serumSources["So11111111111111111111111111111111111111112"]!;
     expect(serumSource.metadata).to.exist;
-    expect(serumSource.metadata!.marketPrices).to.have.all.keys(
-      "bid",
-      "ask",
-      "mid"
-    );
+    expect(serumSource.metadata!.marketPrices).to.have.all.keys("bid", "ask", "mid");
   });
 });

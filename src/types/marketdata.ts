@@ -1,4 +1,4 @@
-import { RawMintInfo } from "../utils";
+import type { RawMintInfo } from "../utils";
 
 export interface IMarketData {
   source: string;

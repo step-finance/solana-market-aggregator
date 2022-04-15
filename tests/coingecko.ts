@@ -1,8 +1,9 @@
-import { expect } from "chai";
 import "mocha";
 
+import { expect } from "chai";
+
 import { CoinGeckoMarketSource } from "../src/sources/coingecko";
-import { MarketDataMap, TokenMap } from "../src/types";
+import type { MarketDataMap, TokenMap } from "../src/types";
 
 const WRAPPED_SOL_ADDRESS = "So11111111111111111111111111111111111111112";
 
@@ -48,8 +49,7 @@ const TEST_TOKEN_MAP: TokenMap = {
       "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/9n4nbM75f5Ui33ZbPYXn59EwSgE8CGsHtAeTH5YFeJ9E/logo.png",
     tags: ["wrapped-sollet", "ethereum"],
     extensions: {
-      bridgeContract:
-        "https://etherscan.io/address/0xeae57ce9cc1984f202e15e038b964bb8bdf7229a",
+      bridgeContract: "https://etherscan.io/address/0xeae57ce9cc1984f202e15e038b964bb8bdf7229a",
       serumV3Usdc: "A8YFbxQYFVqKZaoYJLLUVcQiWP7G2MeEgW5wsAQgMvFw",
       serumV3Usdt: "C1EuT9VokAKLiW7i2ASnZUvxDoKuKkCpDDeNxAptuNe4",
       coingeckoId: "bitcoin",
@@ -63,17 +63,10 @@ const TEST_TOKEN_MAP: TokenMap = {
     decimals: 9,
     logoURI:
       "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/UST98bfV6EASdTFQrRwCBczpehdMFwYCUdLT5tEbhpW/icon.png",
-    tags: [
-      "wrapped",
-      "wormhole",
-      "saber-mkt-usd",
-      "wormhole-v2",
-      "saber-dec-wrapped",
-    ],
+    tags: ["wrapped", "wormhole", "saber-mkt-usd", "wormhole-v2", "saber-dec-wrapped"],
     extensions: {
       address: "uusd",
-      bridgeContract:
-        "https://finder.terra.money/columbus-5/address/terra10nmmwe8r3g99a9newtqa7a75xfgs2e8z87r2sf",
+      bridgeContract: "https://finder.terra.money/columbus-5/address/terra10nmmwe8r3g99a9newtqa7a75xfgs2e8z87r2sf",
       coingeckoId: "terrausd",
       website: "https://app.saber.so",
     },

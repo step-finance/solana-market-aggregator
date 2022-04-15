@@ -1,10 +1,11 @@
-import { Connection, ConfirmOptions } from "@solana/web3.js";
-import { BN, Idl, Program, AnchorProvider, web3 } from "@project-serum/anchor";
+import type { BN, Idl } from "@project-serum/anchor";
+import { AnchorProvider, Program, web3 } from "@project-serum/anchor";
 import type { Wallet } from "@project-serum/anchor/dist/cjs/provider";
+import type { ConfirmOptions, Connection } from "@solana/web3.js";
 
-import { MarketSource } from "./marketsource";
-import type { MarketDataMap } from "../types/marketdata";
 import XSTEP_IDL from "../models/idl/step_staking.json";
+import type { MarketDataMap } from "../types/marketdata";
+import type { MarketSource } from "./marketsource";
 
 const XSTEP_PROGRAM_ID = "Stk5NCWomVN3itaFjLu382u9ibb5jMSHEsh6CuhaGjB";
 export const STEP_MINT = "StepAscQoEioFxxWGnh2sLBDFp9d8rvKz2Yp39iDpyT";
@@ -44,16 +45,8 @@ export class StakedStepMarketSource implements MarketSource {
       publicKey: new web3.PublicKey(STEP_DEPLOYER),
     };
 
-    this.provider = new AnchorProvider(
-      this.connection,
-      wallet,
-      CONFIRM_OPTIONS
-    );
-    this.program = new Program(
-      XSTEP_IDL as Idl,
-      XSTEP_PROGRAM_ID,
-      this.provider
-    );
+    this.provider = new AnchorProvider(this.connection, wallet, CONFIRM_OPTIONS);
+    this.program = new Program(XSTEP_IDL as Idl, XSTEP_PROGRAM_ID, this.provider);
   }
 
   /**

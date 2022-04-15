@@ -1,12 +1,11 @@
 import { expect } from "chai";
+
 import { MarketAggregator } from "../src/marketaggregator";
 
 const STEP_ADDRESS = "StepAscQoEioFxxWGnh2sLBDFp9d8rvKz2Yp39iDpyT";
 const XSTEP_MINT = "xStpgUCss9piqeFUk2iLVcvJEGhAdJxJQuwLkXP555G";
-const EXAMPLE_STEP_DEVNET_TOKEN =
-  "7XWr8fagdZS4mrXUFexQrCd2nYxahR6AtuQkcF2AYecq";
-const EXAMPLE_SABER_DEVNET_TOKEN =
-  "CASHVDm2wsJXfhj6VWxb7GiMdoLc17Du7paH4bNr5woT";
+const EXAMPLE_STEP_DEVNET_TOKEN = "7XWr8fagdZS4mrXUFexQrCd2nYxahR6AtuQkcF2AYecq";
+const EXAMPLE_SABER_DEVNET_TOKEN = "CASHVDm2wsJXfhj6VWxb7GiMdoLc17Du7paH4bNr5woT";
 
 // Saber
 const AEMIM_ADDRESS = "2ASbApnFVSTp2RJvMLgLVfbDwJvu1FRXdhJWrGs89Lhj";
@@ -51,9 +50,7 @@ describe("Market Aggregator", () => {
         cluster: "devnet",
       });
       await aggregator.queryLists();
-      expect(aggregator.tokenMap).to.haveOwnProperty(
-        EXAMPLE_SABER_DEVNET_TOKEN
-      );
+      expect(aggregator.tokenMap).to.haveOwnProperty(EXAMPLE_SABER_DEVNET_TOKEN);
     });
   });
 

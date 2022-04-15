@@ -1,7 +1,8 @@
-import { Cluster, Connection, PublicKey } from "@solana/web3.js";
-import { CLUSTER_SLUGS, ENV } from "@solana/spl-token-registry";
-import type { TokenInfo, TokenList } from "@solana/spl-token-registry";
 import { deserializeMint } from "@saberhq/token-utils";
+import type { TokenInfo, TokenList } from "@solana/spl-token-registry";
+import { CLUSTER_SLUGS, ENV } from "@solana/spl-token-registry";
+import type { Cluster, Connection } from "@solana/web3.js";
+import { PublicKey } from "@solana/web3.js";
 import {
   STEP_SWAP_OWNER,
   STEP_SWAP_PROGRAM_ID,
@@ -9,25 +10,20 @@ import {
   TokenSwapLayout as StepSwapLayout,
 } from "@stepfinance/step-swap";
 import axios from "axios";
-import { getMultipleAccounts, isAccountInfoBuffer } from "./web3";
-import {
-  TokenMap,
-  TokenInfoWithCoingeckoId,
-  tokenInfoHasCoingeckoId,
-} from "../types";
+
+import type { TokenInfoWithCoingeckoId, TokenMap } from "../types";
+import { tokenInfoHasCoingeckoId } from "../types";
 import { getSaberTokenInfos } from ".";
+import { getMultipleAccounts, isAccountInfoBuffer } from "./web3";
 
 // shorten the checksummed version of the input address to have 4 characters at start and end
 export function shortenAddress(address: string, chars = 4): string {
   return `${address.slice(0, chars)}...${address.slice(-chars)}`;
 }
 
-export const getTokenMap = async (
-  connection: Connection,
-  cluster: Cluster
-): Promise<TokenMap> => {
+export const getTokenMap = async (connection: Connection, cluster: Cluster): Promise<TokenMap> => {
   const { data: solanaTokenList } = await axios.get<TokenList>(
-    "https://raw.githubusercontent.com/solana-labs/token-list/main/src/tokens/solana.tokenlist.json"
+    "https://raw.githubusercontent.com/solana-labs/token-list/main/src/tokens/solana.tokenlist.json",
   );
 
   const tokenMap: TokenMap = {};
@@ -50,7 +46,7 @@ export const getTokenMap = async (
   }
 
   const { data: rawStepTokenOverridesList } = await axios.get<TokenInfo[]>(
-    "https://raw.githubusercontent.com/step-finance/token-list-overrides/main/src/token-list.json"
+    "https://raw.githubusercontent.com/step-finance/token-list-overrides/main/src/token-list.json",
   );
 
   for (const tokenInfo of rawStepTokenOverridesList) {
@@ -73,10 +69,7 @@ export const getTokenMap = async (
       new PublicKey(address);
       const existingTokenInfo = tokenMap[address];
       // Don't override if existing token info with coingeckoId already exists
-      if (
-        existingTokenInfo === undefined ||
-        existingTokenInfo.extensions?.coingeckoId === undefined
-      ) {
+      if (existingTokenInfo === undefined || existingTokenInfo.extensions?.coingeckoId === undefined) {
         tokenMap[address] = tokenInfo;
       }
     } catch (e) {
@@ -90,10 +83,7 @@ export const getTokenMap = async (
   }
 
   if (cluster === "devnet") {
-    const devnetStepAMMTokenInfos = await getDevnetStepAMMTokenInfos(
-      connection,
-      tokenMap
-    );
+    const devnetStepAMMTokenInfos = await getDevnetStepAMMTokenInfos(connection, tokenMap);
     for (const tokenInfo of devnetStepAMMTokenInfos) {
       const { address } = tokenInfo;
       if (!tokenMap[address]) {
@@ -170,26 +160,15 @@ const overrideCoingeckoId = (tokenInfo: TokenInfo): TokenInfo => {
   return updatedTokenInfo ? updatedTokenInfo : tokenInfo;
 };
 
-const getDevnetStepAMMTokenInfos = async (
-  connection: Connection,
-  tokenMap: TokenMap
-): Promise<TokenInfo[]> => {
-  const poolRegistry = await StepTokenSwap.loadPoolRegistry(
-    connection,
-    STEP_SWAP_OWNER,
-    STEP_SWAP_PROGRAM_ID
-  );
+const getDevnetStepAMMTokenInfos = async (connection: Connection, tokenMap: TokenMap): Promise<TokenInfo[]> => {
+  const poolRegistry = await StepTokenSwap.loadPoolRegistry(connection, STEP_SWAP_OWNER, STEP_SWAP_PROGRAM_ID);
 
   if (poolRegistry) {
     const poolAccountAddresses = poolRegistry.accounts
       .slice(0, poolRegistry.registrySize)
       .map((publicKey) => publicKey.toBase58());
 
-    const { array } = await getMultipleAccounts(
-      connection,
-      poolAccountAddresses,
-      "single"
-    );
+    const { array } = await getMultipleAccounts(connection, poolAccountAddresses, "single");
     const mintSet = new Set<string>();
     array.forEach((accountInfo) => {
       if (isAccountInfoBuffer(accountInfo)) {
@@ -205,36 +184,29 @@ const getDevnetStepAMMTokenInfos = async (
       }
     });
 
-    const { keys, array: rawMintArray } = await getMultipleAccounts(
-      connection,
-      Array.from(mintSet),
-      "confirmed"
-    );
+    const { keys, array: rawMintArray } = await getMultipleAccounts(connection, Array.from(mintSet), "confirmed");
 
-    return rawMintArray.reduce<TokenInfo[]>(
-      (tokenInfoArray, rawMint, index) => {
-        const address = keys[index];
-        if (!address || !isAccountInfoBuffer(rawMint)) {
-          return tokenInfoArray;
-        }
-        const { decimals } = deserializeMint(rawMint.data);
-        return [
-          ...tokenInfoArray,
-          {
-            address,
-            chainId: ENV.Devnet,
-            decimals,
-            name: shortenAddress(address),
-            symbol: shortenAddress(address),
-            extensions: {
-              // Default devnet tokens to stablecoin
-              coingeckoId: "usd-coin",
-            },
+    return rawMintArray.reduce<TokenInfo[]>((tokenInfoArray, rawMint, index) => {
+      const address = keys[index];
+      if (!address || !isAccountInfoBuffer(rawMint)) {
+        return tokenInfoArray;
+      }
+      const { decimals } = deserializeMint(rawMint.data);
+      return [
+        ...tokenInfoArray,
+        {
+          address,
+          chainId: ENV.Devnet,
+          decimals,
+          name: shortenAddress(address),
+          symbol: shortenAddress(address),
+          extensions: {
+            // Default devnet tokens to stablecoin
+            coingeckoId: "usd-coin",
           },
-        ];
-      },
-      []
-    );
+        },
+      ];
+    }, []);
   }
 
   return [];

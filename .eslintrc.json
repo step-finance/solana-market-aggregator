@@ -1,21 +1,55 @@
 {
-    "env": {
-        "browser": true,
-        "es2021": true,
-        "mocha": true,
-        "node": true
-    },
-    "extends": [
-        "eslint:recommended"
+  "root": true,
+  "env": {
+    "browser": true,
+    "es2021": true,
+    "mocha": true,
+    "node": true
+  },
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:@typescript-eslint/recommended-requiring-type-checking",
+    "plugin:prettier/recommended"
+  ],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": 12,
+    "sourceType": "module",
+    "project": ["tsconfig.json"]
+  },
+  "plugins": [
+    "@typescript-eslint",
+    "simple-import-sort",
+    "import",
+    "unused-imports"
+  ],
+  "rules": {
+    "@typescript-eslint/explicit-member-accessibility": [
+      "error",
+      { "accessibility": "no-public" }
     ],
-    "parser": "@typescript-eslint/parser",
-    "parserOptions": {
-        "ecmaVersion": 12,
-        "sourceType": "module"
-    },
-    "plugins": [
-        "@typescript-eslint"
+    "import/order": "off",
+    "simple-import-sort/imports": "warn",
+    "simple-import-sort/exports": "warn",
+    "import/first": "warn",
+    "import/newline-after-import": "warn",
+    "import/no-duplicates": "warn",
+    "unused-imports/no-unused-imports": "error",
+    "@typescript-eslint/consistent-type-imports": "error",
+    "@typescript-eslint/no-unused-vars": [
+      "warn",
+      {
+        "vars": "all",
+        "varsIgnorePattern": "^_",
+        "args": "after-used",
+        "argsIgnorePattern": "^_"
+      }
     ],
-    "rules": {
-    }
+    "@typescript-eslint/no-unsafe-assignment": 0,
+    "@typescript-eslint/no-unsafe-member-access": 0,
+    "@typescript-eslint/no-unsafe-call": 0,
+    "@typescript-eslint/no-unsafe-return": 0,
+    "@typescript-eslint/no-unsafe-argument": 0
+  }
 }

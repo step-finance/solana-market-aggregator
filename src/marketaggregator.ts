@@ -1,23 +1,20 @@
+import type { Cluster, ConnectionConfig } from "@solana/web3.js";
+import { Connection } from "@solana/web3.js";
+
+import type { MarketSource } from "./sources";
 import {
   CoinGeckoMarketSource,
   SerumMarketSource,
-  StakedStepMarketSource,
   StakedInvictusMarketSource,
-  MarketSource,
+  StakedStepMarketSource,
 } from "./sources";
-import type {
-  ISerumMarketInfo,
-  MarketDataMap,
-  MarketSourcesData,
-  TokenMap,
-} from "./types";
-import { getTokenMap } from "./utils/tokens";
+import { MSRMMarketSource } from "./sources/msrm";
+import type { ISerumMarketInfo, MarketDataMap, MarketSourcesData, TokenMap } from "./types";
+import { AccountCache } from "./utils";
 import { getMintInfoMap } from "./utils/mints";
 import { getSerumMarketInfoMap } from "./utils/serum";
 import { getStarAtlasData } from "./utils/star-atlas";
-import { Cluster, Connection, ConnectionConfig } from "@solana/web3.js";
-import { MSRMMarketSource } from "./sources/msrm";
-import { AccountCache } from "./utils";
+import { getTokenMap } from "./utils/tokens";
 
 export type MarketAggregatorConnectionConfig = ConnectionConfig & {
   endpoint: string;
@@ -50,11 +47,10 @@ export class MarketAggregator {
    *
    * @return Boolean indicating success state
    */
-  public async queryLists(): Promise<boolean> {
+  async queryLists(): Promise<boolean> {
     try {
       const tokenMap = await getTokenMap(this.connection, this.cluster);
-      const { tokenMap: starAtlasTokenMap, markets: starAtlasSerumMarkets } =
-        await getStarAtlasData();
+      const { tokenMap: starAtlasTokenMap, markets: starAtlasSerumMarkets } = await getStarAtlasData();
 
       const serumMarketInfoMap = await getSerumMarketInfoMap();
       this.tokenMap = { ...starAtlasTokenMap, ...tokenMap };
@@ -81,23 +77,18 @@ export class MarketAggregator {
    *
    * @return Array of market datas
    */
-  public async querySources(): Promise<MarketSourcesData> {
+  async querySources(): Promise<MarketSourcesData> {
     // Ensure lists have always been queried at least once
-    if (
-      Object.keys(this.tokenMap).length === 0 ||
-      this.serumMarkets.length === 0
-    ) {
+    if (Object.keys(this.tokenMap).length === 0 || this.serumMarkets.length === 0) {
       await this.queryLists();
     }
 
-    const coingeckoMarketDataMap = await new CoinGeckoMarketSource().query(
-      this.tokenMap
-    );
+    const coingeckoMarketDataMap = await new CoinGeckoMarketSource().query(this.tokenMap);
     const serumSource = new SerumMarketSource(
       this.connection,
       this.accountCache,
       this.serumTokenMap,
-      this.serumMarkets
+      this.serumMarkets,
     );
     const serumMarketDataMap = await serumSource.query();
 
@@ -111,10 +102,7 @@ export class MarketAggregator {
       markets = { ...markets, ...sourceDataMap };
     }
 
-    const mintInfo = await getMintInfoMap(
-      this.connection,
-      Object.keys(this.tokenMap)
-    );
+    const mintInfo = await getMintInfoMap(this.connection, Object.keys(this.tokenMap));
 
     return { markets, mintInfo };
   }

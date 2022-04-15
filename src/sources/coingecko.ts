@@ -1,21 +1,21 @@
 import axios from "axios";
-import {
-  TokenMap,
-  MarketDataMap,
-  ICoinGeckoCoinMarketData,
+
+import type {
   CoingeckoTokenMap,
-  tokenInfoHasCoingeckoId,
+  ICoinGeckoCoinMarketData,
+  MarketDataMap,
   TokenInfoWithCoingeckoId,
+  TokenMap,
 } from "../types";
-import { MarketSource } from "./marketsource";
+import { tokenInfoHasCoingeckoId } from "../types";
 import { chunks } from "../utils/web3";
+import type { MarketSource } from "./marketsource";
 
 /**
  * A class that retrieves market prices from CoinGecko for a given set of tokens
  */
 export class CoinGeckoMarketSource implements MarketSource {
-  readonly API_BASE_URL: string =
-    "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd";
+  readonly API_BASE_URL: string = "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd";
 
   /**
    * Queries the latest market data
@@ -25,21 +25,17 @@ export class CoinGeckoMarketSource implements MarketSource {
   async query(tokenMap: TokenMap): Promise<MarketDataMap> {
     const coingeckoTokenMap: CoingeckoTokenMap = {};
     const coingeckoIds: Set<string> = new Set();
-    for (let baseTokenInfo of Object.values(tokenMap)) {
+    for (const baseTokenInfo of Object.values(tokenMap)) {
       if (tokenInfoHasCoingeckoId(baseTokenInfo)) {
-        let tokenInfo: TokenInfoWithCoingeckoId = baseTokenInfo;
-        let coingeckoId: string = tokenInfo.extensions.coingeckoId;
+        const tokenInfo: TokenInfoWithCoingeckoId = baseTokenInfo;
+        const coingeckoId: string = tokenInfo.extensions.coingeckoId;
         coingeckoTokenMap[tokenInfo.address] = tokenInfo;
         coingeckoIds.add(coingeckoId);
       }
     }
     const pages = chunks(Array.from(coingeckoIds), 250);
     const chunkedResponses = await Promise.all(
-      pages.map((p) =>
-        axios.get<ICoinGeckoCoinMarketData[]>(
-          `${this.API_BASE_URL}&ids=${p.join(",")}&per_page=250`
-        )
-      )
+      pages.map((p) => axios.get<ICoinGeckoCoinMarketData[]>(`${this.API_BASE_URL}&ids=${p.join(",")}&per_page=250`)),
     );
     const coingeckoPriceMap = chunkedResponses
       .flatMap((responses) => responses.data)
@@ -48,26 +44,23 @@ export class CoinGeckoMarketSource implements MarketSource {
           ...map,
           [id]: current_price,
         }),
-        {}
+        {},
       );
 
-    return Object.values(coingeckoTokenMap).reduce<MarketDataMap>(
-      (map, { address, symbol, extensions }) => {
-        const price = coingeckoPriceMap[extensions.coingeckoId];
-        if (price) {
-          return {
-            ...map,
-            [address]: {
-              source: "coingecko",
-              symbol,
-              address,
-              price,
-            },
-          };
-        }
-        return map;
-      },
-      {}
-    );
+    return Object.values(coingeckoTokenMap).reduce<MarketDataMap>((map, { address, symbol, extensions }) => {
+      const price = coingeckoPriceMap[extensions.coingeckoId];
+      if (price) {
+        return {
+          ...map,
+          [address]: {
+            source: "coingecko",
+            symbol,
+            address,
+            price,
+          },
+        };
+      }
+      return map;
+    }, {});
   }
 }

@@ -1,19 +1,15 @@
 import { Market } from "@project-serum/serum";
-import { AccountInfo, PublicKey } from "@solana/web3.js";
-import { ParsedAccountBase } from ".";
-import { AccountCache } from "../cache";
+import type { AccountInfo } from "@solana/web3.js";
+import { PublicKey } from "@solana/web3.js";
+
+import type { AccountCache } from "../cache";
+import type { ParsedAccountBase } from ".";
 import { MintParser } from "./mint";
 import { OrderBookParser } from "./orderbook";
 
-export const DEFAULT_DEX_ID = new PublicKey(
-  "9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin"
-);
+export const DEFAULT_DEX_ID = new PublicKey("9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin");
 
-export const DexMarketParser = (
-  pubkey: PublicKey,
-  acc: AccountInfo<Buffer>,
-  accountCache?: AccountCache
-) => {
+export const DexMarketParser = (pubkey: PublicKey, acc: AccountInfo<Buffer>, accountCache?: AccountCache) => {
   const decoded = Market.getLayout(DEFAULT_DEX_ID).decode(acc.data);
 
   const details = {

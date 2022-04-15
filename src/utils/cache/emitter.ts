@@ -52,10 +52,7 @@ export class EventEmitter {
   }
 
   raiseCacheUpdated(id: string, isNew: boolean, parser: any) {
-    this.emitter.emit(
-      CacheUpdateEvent.type,
-      new CacheUpdateEvent(id, isNew, parser)
-    );
+    this.emitter.emit(CacheUpdateEvent.type, new CacheUpdateEvent(id, isNew, parser));
   }
 
   raiseCacheDeleted(id: string) {
