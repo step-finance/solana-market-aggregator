@@ -50,13 +50,14 @@ export class SerumMarketSource implements MarketSource {
     this.accountCache = accountCache;
     this.tokenMap = tokenMap;
     this.markets = markets;
+    this.marketKeys = [];
 
-    this.marketKeys = this.markets.reduce<string[]>((keys, { address, baseMintAddress, deprecated }) => {
+    for (const m of this.markets) {
+      const { address, baseMintAddress, deprecated } = m;
       if (!deprecated && this.tokenMap[baseMintAddress]) {
-        keys.push(address);
+        this.marketKeys.push(address);
       }
-      return keys;
-    }, []);
+    }
   }
 
   /**
@@ -69,7 +70,7 @@ export class SerumMarketSource implements MarketSource {
       this.connection,
       // only query for markets that are not in cache
       this.marketKeys.filter((a) => this.accountCache.get(a) === undefined),
-      "single",
+      "confirmed",
     );
 
     for (let index = 0; index < array.length; index++) {
@@ -136,7 +137,7 @@ export class SerumMarketSource implements MarketSource {
 
     const allKeys = [...accountsToQuery.keys(), ...mintsToQuery.keys()];
 
-    await getMultipleAccounts(this.connection, allKeys, "single").then(({ keys, array }) => {
+    await getMultipleAccounts(this.connection, allKeys, "confirmed").then(({ keys, array }) => {
       return array
         .map((item, index) => {
           const address = keys[index];

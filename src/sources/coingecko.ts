@@ -47,20 +47,25 @@ export class CoinGeckoMarketSource implements MarketSource {
         {},
       );
 
-    return Object.values(coingeckoTokenMap).reduce<MarketDataMap>((map, { address, symbol, extensions }) => {
-      const price = coingeckoPriceMap[extensions.coingeckoId];
+    const marketDataMap: MarketDataMap = {};
+    const cgMarkets = Object.values(coingeckoTokenMap);
+    for (let index = 0; index < cgMarkets.length; index++) {
+      const market = cgMarkets[index];
+      if (!market) {
+        continue;
+      }
+
+      const price = coingeckoPriceMap[market.extensions.coingeckoId];
       if (price) {
-        return {
-          ...map,
-          [address]: {
-            source: "coingecko",
-            symbol,
-            address,
-            price,
-          },
+        marketDataMap[market.address] = {
+          source: "coingecko",
+          symbol: market.symbol,
+          address: market.address,
+          price,
         };
       }
-      return map;
-    }, {});
+    }
+
+    return marketDataMap;
   }
 }

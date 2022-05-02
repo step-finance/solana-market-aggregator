@@ -168,7 +168,7 @@ const getDevnetStepAMMTokenInfos = async (connection: Connection, tokenMap: Toke
       .slice(0, poolRegistry.registrySize)
       .map((publicKey) => publicKey.toBase58());
 
-    const { array } = await getMultipleAccounts(connection, poolAccountAddresses, "single");
+    const { array } = await getMultipleAccounts(connection, poolAccountAddresses, "confirmed");
     const mintSet = new Set<string>();
     array.forEach((accountInfo) => {
       if (isAccountInfoBuffer(accountInfo)) {
