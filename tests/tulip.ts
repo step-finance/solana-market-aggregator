@@ -17,6 +17,6 @@ describe("Tulip Staking", () => {
     const { markets } = await aggregator.querySources();
     expect(markets).to.not.be.empty;
     expect(markets).to.contain.keys([sTulipMintStr]);
-    expect(markets[sTulipMintStr]?.price).above(0); // If there is an error then the price would be 0
+    expect(markets[sTulipMintStr]?.price).above(0);
   });
 });
