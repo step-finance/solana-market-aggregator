@@ -7,6 +7,7 @@ import {
   SerumMarketSource,
   StakedInvictusMarketSource,
   StakedStepMarketSource,
+  StakedTulipMarketSource,
 } from "./sources";
 import { MSRMMarketSource } from "./sources/msrm";
 import type { ISerumMarketInfo, MarketDataMap, MarketSourcesData, TokenMap } from "./types";
@@ -116,5 +117,6 @@ export class MarketAggregator {
     this.stakedSources.push(new StakedStepMarketSource(this.connection));
     this.stakedSources.push(new StakedInvictusMarketSource(this.connection));
     this.stakedSources.push(new MSRMMarketSource());
+    this.stakedSources.push(new StakedTulipMarketSource(this.connection));
   }
 }
