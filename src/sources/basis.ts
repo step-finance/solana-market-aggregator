@@ -5,7 +5,10 @@ import type { MarketDataMap } from "../types";
 import type { MarketSource } from "./marketsource";
 
 export const R_BASIS_MINT = new PublicKey("rBsH9ME52axhqSjAVXY3t1xcCrmntVNvP3X16pRjVdM");
-export const BASIS_MINT = new PublicKey("3sBX8hj4URsiBCSRV26fEHkake295fQnM44EYKKsSs51");
+export const BASIS_MINT = new PublicKey("Basis9oJw9j8cw53oMV7iqsgo6ihi9ALw4QR31rcjUJa");
+// This ATA holds all staked BASIS tokens in which the user is given
+// a proportional amount of rBASIS to match their staked position
+export const BASIS_TOKEN_VAULT = new PublicKey("3sBX8hj4URsiBCSRV26fEHkake295fQnM44EYKKsSs51");
 
 export class StakedBasisMarketSource implements MarketSource {
   readonly connection: Connection;
@@ -25,20 +28,20 @@ export class StakedBasisMarketSource implements MarketSource {
         return 0;
       });
 
-    const basisSupply = await this.connection
-      .getTokenAccountBalance(BASIS_MINT)
+    const basisSupplyInTokenVault = await this.connection
+      .getTokenAccountBalance(BASIS_TOKEN_VAULT)
       .then((response: RpcResponseAndContext<TokenAmount>) => {
         return response.value.uiAmount;
       })
       .catch(() => {
-        console.error(`Unexpected failure to getTokenSupply for ${BASIS_MINT.toBase58()}`);
+        console.error(`Unexpected failure to getTokenAccountBalance for ${BASIS_TOKEN_VAULT.toBase58()}`);
         return 0;
       });
 
     // BASIS to rBASIS ratio
     let ratio = 0;
-    if (rBasisSupply && basisSupply) {
-      ratio = basisSupply / rBasisSupply;
+    if (rBasisSupply && basisSupplyInTokenVault) {
+      ratio = basisSupplyInTokenVault / rBasisSupply;
     }
 
     const basisMarketData = marketDataMap[BASIS_MINT.toBase58()];
