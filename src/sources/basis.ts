@@ -1,4 +1,4 @@
-import type { Connection, RpcResponseAndContext, TokenAmount } from "@solana/web3.js";
+import type { Connection } from "@solana/web3.js";
 import { PublicKey } from "@solana/web3.js";
 
 import type { MarketDataMap } from "../types";
@@ -18,25 +18,9 @@ export class StakedBasisMarketSource implements MarketSource {
   }
 
   async query(marketDataMap: MarketDataMap): Promise<MarketDataMap> {
-    const rBasisSupply = await this.connection
-      .getTokenSupply(R_BASIS_MINT)
-      .then((response: RpcResponseAndContext<TokenAmount>) => {
-        return response.value.uiAmount;
-      })
-      .catch(() => {
-        console.error(`Unexpected failure to getTokenAccountBalance for ${R_BASIS_MINT.toBase58()}`);
-        return 0;
-      });
-
-    const basisSupplyInTokenVault = await this.connection
-      .getTokenAccountBalance(BASIS_TOKEN_VAULT)
-      .then((response: RpcResponseAndContext<TokenAmount>) => {
-        return response.value.uiAmount;
-      })
-      .catch(() => {
-        console.error(`Unexpected failure to getTokenAccountBalance for ${BASIS_TOKEN_VAULT.toBase58()}`);
-        return 0;
-      });
+    const rBasisSupply = (await this.connection.getTokenSupply(R_BASIS_MINT))?.value.uiAmount ?? 0;
+    const basisSupplyInTokenVault =
+      (await this.connection.getTokenAccountBalance(BASIS_TOKEN_VAULT))?.value.uiAmount ?? 0;
 
     // BASIS to rBASIS ratio
     let ratio = 0;
