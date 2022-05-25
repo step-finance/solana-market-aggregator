@@ -1,25 +1,28 @@
 import "mocha";
 
+import { Connection } from "@solana/web3.js";
 import { expect } from "chai";
 
-import { MarketAggregator } from "../src";
-import { R_BASIS_MINT } from "../src/sources";
+import type { MarketDataMap } from "../dist";
+import { StakedBasisMarketSource } from "../src/sources";
 
 describe("Basis Market Staking", () => {
-  it("calculates price of rBASIS vs BASIS", async () => {
-    const aggregator = new MarketAggregator({
-      cluster: "mainnet-beta",
-      endpoint: process.env.MAINNET_ENDPOINT!,
-    });
+  it("Provides market data for rBASIS token", async () => {
+    const marketSource = new StakedBasisMarketSource(new Connection(process.env.MAINNET_ENDPOINT as string));
+    const marketDataMap = {
+      ["Basis9oJw9j8cw53oMV7iqsgo6ihi9ALw4QR31rcjUJa"]: {
+        address: "Basis9oJw9j8cw53oMV7iqsgo6ihi9ALw4QR31rcjUJa",
+        price: 20,
+        source: "coingecko",
+        symbol: "BASIS",
+      },
+    };
+    const marketData: MarketDataMap = await marketSource.query(marketDataMap);
+    const { address, price, source, symbol } = marketData["rBsH9ME52axhqSjAVXY3t1xcCrmntVNvP3X16pRjVdM"] || {};
 
-    // eslint-disable-next-line no-debugger
-    debugger;
-
-    const rBasisMintStr: string = R_BASIS_MINT.toBase58();
-
-    const { markets } = await aggregator.querySources();
-    expect(markets).to.not.be.empty;
-    expect(markets).to.contain.keys([rBasisMintStr]);
-    expect(markets[rBasisMintStr]?.price).above(0); // If there is an error then the price would be 0
+    expect(address).to.equal("rBsH9ME52axhqSjAVXY3t1xcCrmntVNvP3X16pRjVdM");
+    expect(price).to.be.greaterThan(20);
+    expect(source).to.equal("contract");
+    expect(symbol).to.equal("rBASIS");
   });
 });
