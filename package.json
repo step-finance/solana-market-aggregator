@@ -68,7 +68,7 @@
     "@saberhq/token-utils": "^1.13.15",
     "@solana/spl-token": "^0.1.8",
     "@solana/spl-token-registry": "^0.2.3739",
-    "@solana/web3.js": "^1.43.1",
+    "@solana/web3.js": "^1.43.4",
     "@stepfinance/step-swap": "^1.1.1",
     "axios": "^0.27.2",
     "bn.js": "^5.2.0",
