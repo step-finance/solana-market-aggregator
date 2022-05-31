@@ -5,10 +5,10 @@ import type { MarketSource } from "./sources";
 import {
   CoinGeckoMarketSource,
   SerumMarketSource,
+  StakedBasisMarketSource,
   StakedInvictusMarketSource,
   StakedStepMarketSource,
   StakedTulipMarketSource,
-  StakedBasisMarketSource,
 } from "./sources";
 import { MSRMMarketSource } from "./sources/msrm";
 import type { ISerumMarketInfo, MarketDataMap, MarketSourcesData, TokenMap } from "./types";
@@ -118,7 +118,9 @@ export class MarketAggregator {
     this.stakedSources.push(new StakedStepMarketSource(this.connection));
     this.stakedSources.push(new StakedInvictusMarketSource(this.connection));
     this.stakedSources.push(new MSRMMarketSource());
-    this.stakedSources.push(new StakedTulipMarketSource(this.connection));
-    this.stakedSources.push(new StakedBasisMarketSource(this.connection));
+    if (this.cluster === "mainnet-beta") {
+      this.stakedSources.push(new StakedTulipMarketSource(this.connection));
+      this.stakedSources.push(new StakedBasisMarketSource(this.connection));
+    }
   }
 }
