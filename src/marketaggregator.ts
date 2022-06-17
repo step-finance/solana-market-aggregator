@@ -51,10 +51,8 @@ export class MarketAggregator {
    */
   async queryLists(): Promise<boolean> {
     const tokenMap = await getTokenMap(this.connection, this.cluster);
-    const starAtlasData = await getStarAtlasData();  
-    const starAtlasTokenMap = starAtlasData?.tokenMap;
-    const starAtlasSerumMarkets = starAtlasData?.markets || []
-    const serumMarketInfoMap = await getSerumMarketInfoMap() || [];
+    const { tokenMap: starAtlasTokenMap, markets: starAtlasSerumMarkets } = await getStarAtlasData();
+    const serumMarketInfoMap = await getSerumMarketInfoMap();
 
     this.tokenMap = { ...starAtlasTokenMap, ...tokenMap };
 

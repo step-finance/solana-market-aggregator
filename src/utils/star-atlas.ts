@@ -22,7 +22,7 @@ export const getStarAtlasData = async () => {
       symbol: symbol,
       tags: ["nft"],
     }));
-  
+
     const tokenMap = starAtlasTokenInfos.reduce<TokenMap>(
       (map, tokenInfo) => ({
         ...map,
@@ -30,7 +30,7 @@ export const getStarAtlasData = async () => {
       }),
       {},
     );
-  
+
     const markets = starAtlasApiResponse.data.reduce<ISerumMarketInfo[]>((serumMarkets, { markets, symbol, mint }) => {
       const market = markets.find((m) => m.quotePair === "USDC");
       if (!market) {
@@ -49,13 +49,16 @@ export const getStarAtlasData = async () => {
         },
       ];
     }, []);
-  
+
     return {
       tokenMap,
       markets,
     };
   } catch (err) {
-    console.log(err)
-    return
+    console.log(err);
+    return {
+      tokenMap: {},
+      markets: [],
+    };
   }
 };
