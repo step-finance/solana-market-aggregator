@@ -50,26 +50,21 @@ export class MarketAggregator {
    * @return Boolean indicating success state
    */
   async queryLists(): Promise<boolean> {
-    try {
-      const tokenMap = await getTokenMap(this.connection, this.cluster);
-      const { tokenMap: starAtlasTokenMap, markets: starAtlasSerumMarkets } = await getStarAtlasData();
+    const tokenMap = await getTokenMap(this.connection, this.cluster);
+    const { tokenMap: starAtlasTokenMap, markets: starAtlasSerumMarkets } = await getStarAtlasData();
+    const serumMarketInfoMap = await getSerumMarketInfoMap();
 
-      const serumMarketInfoMap = await getSerumMarketInfoMap();
-      this.tokenMap = { ...starAtlasTokenMap, ...tokenMap };
+    this.tokenMap = { ...starAtlasTokenMap, ...tokenMap };
 
-      const serumTokenMap: TokenMap = {};
-      const tokenInfos = Object.values(this.tokenMap);
-      for (const tokenInfo of tokenInfos) {
-        if (!tokenInfo.extensions?.coingeckoId) {
-          serumTokenMap[tokenInfo.address] = tokenInfo;
-        }
+    const serumTokenMap: TokenMap = {};
+    const tokenInfos = Object.values(this.tokenMap);
+    for (const tokenInfo of tokenInfos) {
+      if (!tokenInfo.extensions?.coingeckoId) {
+        serumTokenMap[tokenInfo.address] = tokenInfo;
       }
-      this.serumTokenMap = serumTokenMap;
-      this.serumMarkets = [...starAtlasSerumMarkets, ...serumMarketInfoMap];
-    } catch (err) {
-      console.log(err);
-      return false;
     }
+    this.serumTokenMap = serumTokenMap;
+    this.serumMarkets = [...starAtlasSerumMarkets, ...serumMarketInfoMap];
 
     return true;
   }
