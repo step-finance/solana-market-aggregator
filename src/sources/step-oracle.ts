@@ -46,7 +46,7 @@ export class StepOracleMarketSource implements MarketSource {
 
     return {
       [STEP_MINT]: {
-        source: "contract",
+        source: "switchboard",
         symbol: "STEP",
         address: STEP_MINT,
         price: Number(latestResult),

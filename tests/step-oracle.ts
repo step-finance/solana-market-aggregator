@@ -14,7 +14,8 @@ describe("Step Oracle Price", () => {
 
     expect(address).to.equal("StepAscQoEioFxxWGnh2sLBDFp9d8rvKz2Yp39iDpyT");
     expect(price).to.be.greaterThan(0.01);
-    expect(source).to.equal("contract");
+    expect(price).to.be.lessThan(10);
+    expect(source).to.equal("switchboard");
     expect(symbol).to.equal("STEP");
   });
 });
