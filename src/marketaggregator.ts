@@ -9,6 +9,7 @@ import {
   StakedInvictusMarketSource,
   StakedStepMarketSource,
   StakedTulipMarketSource,
+  StepOracleMarketSource,
 } from "./sources";
 import { MSRMMarketSource } from "./sources/msrm";
 import type { ISerumMarketInfo, MarketDataMap, MarketSourcesData, TokenMap } from "./types";
@@ -111,6 +112,7 @@ export class MarketAggregator {
    */
   private setupStakedSources() {
     this.stakedSources.push(new StakedStepMarketSource(this.connection));
+    this.stakedSources.push(new StepOracleMarketSource(this.connection));
     this.stakedSources.push(new StakedInvictusMarketSource(this.connection));
     this.stakedSources.push(new MSRMMarketSource());
     if (this.cluster === "mainnet-beta") {
