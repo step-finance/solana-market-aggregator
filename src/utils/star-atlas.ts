@@ -9,7 +9,7 @@ export type StarAtlasData = {
   markets: ISerumMarketInfo[];
 };
 
-export const STAR_ATLAS_API_URL = "https://galaxy.production.run.staratlas.one/nfts" as const;
+export const STAR_ATLAS_API_URL = "https://galaxy.staratlas.com/nfts" as const;
 
 export const getStarAtlasData = async () => {
   try {
